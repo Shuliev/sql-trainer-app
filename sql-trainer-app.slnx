@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/docs/Konzept Architektur/">
+    <File Path="docs/Konzept Architektur/STATUS.md" />
+  </Folder>
+</Solution>

@@ -55,3 +55,7 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Session guidance (untracked, per-session role doc)
+CLAUDE.md
+/.vs
