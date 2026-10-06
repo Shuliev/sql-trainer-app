@@ -56,5 +56,8 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
+# Program exports
+publish/
+
 # IDE specific Settings
 .idea/

@@ -2,6 +2,20 @@
 
 A Blazor Server (interactive server render mode) web app built with MudBlazor.
 
+## Short description
+
+#### Start the app with:
+```bash
+dotnet watch
+```
+
+#### Publish the app to `./publish/win-x64/SqlApp.exe` with:
+```bash
+dotnet publish -c Release -r win-x64 -o ./publish/win-x64
+```
+
+## Long Description
+
 ## Get started (development)
 
 ### Prerequisites
