@@ -1,0 +1,118 @@
+@page "/aboutUs"
+
+<PageTitle>Über uns - SQL-Trainer</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Über uns</MudText>
+<MudText Class="mb-8">Erfahre mehr über das Team hinter diesem Projekt und die Technologien, die wir verwenden.</MudText>
+
+<MudText Typo="Typo.h5" GutterBottom="true">Das Entwicklungsteam</MudText>
+<br />
+
+<MudGrid Class="mb-8">
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Daniil</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Beitrag folgt in Kürze...</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Daniel</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Beitrag folgt in Kürze...</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Furkan</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Beitrag folgt in Kürze...</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Yirga</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Beitrag folgt in Kürze...</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudAlert Severity="Severity.Normal" ContentAlignment="HorizontalAlignment.Start">
+    Dieses Projekt wurde im Rahmen eines Schulprojekts entwickelt, um den Umgang mit SQL spielerisch und interaktiv zu erlernen.
+</MudAlert>
+
+<br />
+<MudText Typo="Typo.h5" GutterBottom="true">Über das Projekt</MudText>
+<br />
+<MudText Typo="Typo.body2">
+    Der SQL-Trainer wurde mit modernen Web-Technologien aus dem .NET-Ökosystem entwickelt.<br />
+    Ziel des Projekts ist es, Nutzerinnen und Nutzern eine anschauliche und interaktive Möglichkeit zu bieten,<br />
+    SQL-Abfragen zu üben und zu verstehen.
+</MudText>
+
+<br />
+<MudText Typo="Typo.h6" GutterBottom="true">.NET 10</MudText>
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Die Anwendung basiert auf .NET 10, der neuesten Version des .NET-Frameworks von Microsoft.<br />
+    .NET 10 bringt zahlreiche Performance-Verbesserungen und neue Features mit sich,<br />
+    die es ermöglichen, moderne, schnelle und skalierbare Webanwendungen zu entwickeln.
+</MudText>
+
+<br />
+<MudText Typo="Typo.h6" GutterBottom="true">Blazor</MudText>
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Für die Benutzeroberfläche verwenden wir Blazor, ein Framework von Microsoft,<br />
+    mit dem sich interaktive Webanwendungen vollständig in C# statt JavaScript entwickeln lassen.<br />
+    Dank der verschiedenen Render-Modi (Server, WebAssembly, Auto) kann die Anwendung<br />
+    flexibel auf unterschiedliche Anforderungen an Performance und Interaktivität reagieren.
+</MudText>
+
+<br />
+<MudText Typo="Typo.h6" GutterBottom="true">MudBlazor</MudText>
+<MudText Typo="Typo.body2">
+    Für das Design und die Komponenten der Benutzeroberfläche setzen wir auf die MudBlazor-Bibliothek.<br />
+    Sie basiert auf den Prinzipien von Material Design und bietet eine große Auswahl<br />
+    an fertigen, gut gestalteten und leicht anpassbaren UI-Komponenten.<br />
+    Mehr Informationen dazu findest du auf der offiziellen Website:
+    <MudLink Href="https://mudblazor.com" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
+        <b>www.mudblazor.com</b>
+    </MudLink>
+</MudText>
+
+<br />
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudText Typo="Typo.h6" GutterBottom="true">Hinweis zu KI-generierten Inhalten</MudText>
+        <MudText Typo="Typo.body2">
+            Ein Teil des Codes und der Inhalte dieser Anwendung wurde mit Unterstützung von<br />
+            KI-gestützten Werkzeugen (z. B. GitHub Copilot) erstellt. Wir bemühen uns um Korrektheit,<br />
+            können jedoch nicht garantieren, dass alle Inhalte fehlerfrei oder vollständig akkurat sind.
+        </MudText>
+    </MudCardContent>
+</MudCard>
+
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudText Typo="Typo.h6" GutterBottom="true">Lizenz &amp; Nutzung</MudText>
+        <MudText Typo="Typo.body2">
+            Der Quellcode dieses Projekts ist öffentlich einsehbar. Da es sich um ein Schulprojekt handelt,<br />
+            wird das Urheberrecht an den Inhalten nicht aktiv durchgesetzt – der Code darf gerne eingesehen,<br />
+            verwendet und als Inspiration für eigene Projekte genutzt werden.<br />
+            <br />
+            Den Quellcode findest du hier:
+            <MudLink Href="@RepoUrl" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
+                <b>@RepoUrl</b>
+            </MudLink>
+        </MudText>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private const string RepoUrl = "https://github.com/Shuliev/sql-trainer-app";
+}
