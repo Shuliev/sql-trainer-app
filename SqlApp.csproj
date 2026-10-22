@@ -1,0 +1,82 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- Never treat our own publish output (if produced inside the project folder) as project content/globs. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);publish/**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!--
+    These settings only kick in when you publish with an explicit RuntimeIdentifier,
+    e.g. "dotnet publish -c Release -r win-x64 -o ./publish". They won't affect
+    normal `dotnet build` / `dotnet run` on your dev machine.
+  -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <PublishTrimmed>false</PublishTrimmed>
+    <!-- Keep the publish output lean: no .pdb, no IIS web.config, no dev-only appsettings. -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <Content Remove="appsettings.Development.json" />
+  </ItemGroup>
+
+  <!--
+    True single-file packaging: embed every static web asset (app's own wwwroot files,
+    MudBlazor's CSS/JS, Blazor's own _framework/blazor.web.js, scoped component CSS, etc.)
+    directly into the assembly as embedded resources. Runs on every build (dev and publish
+    alike) so `dotnet run` and the published .exe both serve assets the same way, via the
+    plain EmbeddedFileProvider wired up in Program.cs (replacing MapStaticAssets()/@Assets[]).
+  -->
+  <Target Name="EmbedStaticWebAssetsAsResources" BeforeTargets="_GenerateCompileInputs" DependsOnTargets="ResolveBuildStaticWebAssets">
+    <ItemGroup>
+      <_EmbeddableStaticWebAsset Include="@(StaticWebAsset)"
+        Condition="!$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.gz'))
+                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.br'))
+                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').Contains('.bundle.scp.css'))" />
+      <_EmbeddableStaticWebAsset>
+        <!-- Strip the "#[.{fingerprint}]?"/"!" placeholder markers used by the fingerprinting system. -->
+        <_PlainRelativePath>$([System.Text.RegularExpressions.Regex]::Replace('%(_EmbeddableStaticWebAsset.RelativePath)', '#\[\.\{fingerprint(=[^}]*)?\}\][?!]', ''))</_PlainRelativePath>
+      </_EmbeddableStaticWebAsset>
+      <_EmbeddableStaticWebAsset>
+        <_WebRequestPath Condition="'%(_EmbeddableStaticWebAsset.BasePath)' == '/'">%(_EmbeddableStaticWebAsset._PlainRelativePath)</_WebRequestPath>
+        <_WebRequestPath Condition="'%(_EmbeddableStaticWebAsset.BasePath)' != '/'">%(_EmbeddableStaticWebAsset.BasePath)/%(_EmbeddableStaticWebAsset._PlainRelativePath)</_WebRequestPath>
+      </_EmbeddableStaticWebAsset>
+      <_EmbeddableStaticWebAsset>
+        <!-- Dot-separated logical name matching plain EmbeddedFileProvider's lookup convention: baseNamespace + "." + path.Replace('/', '.') -->
+        <_LogicalName>$(AssemblyName).wwwroot.$([System.String]::Copy('%(_EmbeddableStaticWebAsset._WebRequestPath)').Replace('/', '.'))</_LogicalName>
+        <!-- Clear inherited copy metadata so these don't ALSO get published as loose files (that's the SDK's normal
+             static web asset pipeline's job, independent of this embedding) and collide with it on the same path. -->
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      </_EmbeddableStaticWebAsset>
+      <EmbeddedResource Include="@(_EmbeddableStaticWebAsset)" LogicalName="%(_EmbeddableStaticWebAsset._LogicalName)" WithCulture="false" Type="Non-Resx" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    For a RuntimeIdentifier-targeted publish (the single-file .exe scenario), the SDK still
+    copies the physical wwwroot/ folder and the staticwebassets.endpoints.json manifest into
+    the publish output by default. Those are now redundant (everything they'd contain is
+    already embedded in the .exe), so delete them post-publish to get a truly minimal output.
+  -->
+  <Target Name="RemoveRedundantStaticWebAssetsFromPublishOutput" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' != ''">
+    <RemoveDir Directories="$(PublishDir)wwwroot" Condition="Exists('$(PublishDir)wwwroot')" />
+    <Delete Files="$(PublishDir)$(TargetName).staticwebassets.endpoints.json" Condition="Exists('$(PublishDir)$(TargetName).staticwebassets.endpoints.json')" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="9.*" />
+  </ItemGroup>
+</Project>
