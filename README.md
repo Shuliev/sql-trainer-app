@@ -101,3 +101,13 @@ dotnet publish -c Release -r osx-arm64 -o ./publish/osx-arm64
 
 (Automatic browser launch and single-file packaging should work the same way on those
 platforms too.)
+
+## Uploaded databases
+
+On the "Datenbanken verwalten" page, users can upload a database package as a `.zip`
+(e.g. `Name_der_Datenbank.zip`) containing `beschreibung.txt`, `er_diagramm.png`,
+`datenbank.sql` and `aufgaben.txt` (at the zip root or inside one top-level folder).
+It is extracted to `Datenbanken/Name_der_Datenbank/`:
+
+- Published exe: next to `SqlApp.exe` (falls back to `%LOCALAPPDATA%\SqlApp\Datenbanken` if that folder isn't writable).
+- Development: in the project folder (git-ignored).

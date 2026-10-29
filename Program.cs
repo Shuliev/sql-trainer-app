@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.FileProviders;
 using MudBlazor.Services;
 using SqlApp.Components;
+using SqlApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,8 @@ if (!hasExplicitUrls)
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
+
+builder.Services.AddSingleton<DatabaseStorageService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

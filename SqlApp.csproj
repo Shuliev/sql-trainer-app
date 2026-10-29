@@ -79,4 +79,8 @@
   <ItemGroup>
     <PackageReference Include="MudBlazor" Version="9.*" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Datenbanken\" />
+  </ItemGroup>
 </Project>

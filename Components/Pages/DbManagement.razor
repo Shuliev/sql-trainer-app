@@ -1,0 +1,122 @@
+@page "/datenbanken-verwalten"
+@using SqlApp.Services
+@inject DatabaseStorageService Storage
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Datenbanken verwalten</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Datenbanken verwalten</MudText>
+
+<MudText Typo="Typo.body1" Class="mb-4">Current count: @_currentCount</MudText>
+
+<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">Click me</MudButton>
+
+<MudPaper Class="pa-4 my-4">
+    <MudText Typo="Typo.h6">Datenbank hochladen</MudText>
+    <MudText Typo="Typo.body2" Class="mb-3">
+        Lade eine ZIP-Datei (z.&nbsp;B. <code>Name_der_Datenbank.zip</code>) hoch, die folgende Dateien enthält:
+        @string.Join(", ", DatabaseStorageService.RequiredFiles).
+    </MudText>
+
+    <MudFileUpload T="IBrowserFile" Accept=".zip" FilesChanged="UploadFile" MaximumFileCount="1" Disabled="_isUploading">
+        <CustomContent Context="upload">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_isUploading"
+                       StartIcon="@Icons.Material.Filled.CloudUpload" OnClick="upload.OpenFilePickerAsync">
+                Datenbank hochladen
+            </MudButton>
+        </CustomContent>
+        <SelectedTemplate />
+    </MudFileUpload>
+
+    @if (_isUploading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-3" />
+    }
+</MudPaper>
+
+<MudPaper Class="pa-4 my-4">
+    <MudText Typo="Typo.h6">Gespeicherte Datenbanken</MudText>
+    <MudText Typo="Typo.caption" Class="mb-2">Speicherort: @Storage.StorageDirectory</MudText>
+    @if (_databases.Count == 0)
+    {
+        <MudText Typo="Typo.body2">Noch keine Datenbanken hochgeladen.</MudText>
+    }
+    else
+    {
+        <MudList T="string" Dense="true">
+            @foreach (var db in _databases)
+            {
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Storage" Text="@db" />
+            }
+        </MudList>
+    }
+</MudPaper>
+
+@code {
+    private int _currentCount = 0;
+    private bool _isUploading;
+    private IReadOnlyList<string> _databases = [];
+
+    protected override void OnInitialized() => _databases = Storage.ListDatabases();
+
+    private void IncrementCount()
+    {
+        _currentCount += 2;
+    }
+
+    private async Task UploadFile(IBrowserFile? file)
+    {
+        if (file is null)
+        {
+            return;
+        }
+
+        if (!file.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            Snackbar.Add("Bitte eine ZIP-Datei auswählen.", Severity.Error);
+            return;
+        }
+
+        if (file.Size > DatabaseStorageService.MaxUploadBytes)
+        {
+            Snackbar.Add($"Die Datei ist zu groß (max. {DatabaseStorageService.MaxUploadBytes / 1024 / 1024} MB).", Severity.Error);
+            return;
+        }
+
+        var name = DatabaseStorageService.GetDatabaseName(file.Name);
+        if (Storage.Exists(name))
+        {
+            var overwrite = await DialogService.ShowMessageBoxAsync(
+                "Datenbank existiert bereits",
+                $"Eine Datenbank mit dem Namen \"{name}\" existiert bereits. Überschreiben?",
+                yesText: "Überschreiben", cancelText: "Abbrechen");
+            if (overwrite != true)
+            {
+                return;
+            }
+        }
+
+        _isUploading = true;
+        StateHasChanged();
+        try
+        {
+            await using var stream = file.OpenReadStream(DatabaseStorageService.MaxUploadBytes);
+            await Storage.SaveZipAsync(stream, name);
+            Snackbar.Add($"Datenbank \"{name}\" wurde gespeichert.", Severity.Success);
+            _databases = Storage.ListDatabases();
+        }
+        catch (InvalidDataException ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler beim Hochladen: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isUploading = false;
+        }
+    }
+}
