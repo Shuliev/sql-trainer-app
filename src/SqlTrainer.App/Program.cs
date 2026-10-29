@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.FileProviders;
 using MudBlazor.Services;
-using SqlApp.Components;
+using SqlTrainer.App.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

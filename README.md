@@ -9,7 +9,7 @@ A Blazor Server (interactive server render mode) web app built with MudBlazor.
 dotnet watch
 ```
 
-#### Publish the app to `./publish/win-x64/SqlApp.exe` with:
+#### Publish the app to `./publish/win-x64/SqlTrainer.App.exe` with:
 ```bash
 dotnet publish -c Release -r win-x64 -o ./publish/win-x64
 ```
@@ -56,11 +56,11 @@ It will also make the app available to other devices on the same network at `htt
 Your IP will be shown in the console output when the app starts.
 If we want to disable this in the future, go to `Properties/launchSettings.json` and replace `0.0.0.0` with `localhost`.
 
-## Publishing to SqlApp.Exe
+## Publishing to SqlTrainer.App.exe
 
-The app publishes to a **single, fully self-contained `SqlApp.exe`** for Windows.
+The app publishes to a **single, fully self-contained `SqlTrainer.App.exe`** for Windows.
 
-From the project folder (`sql-trainer-app/`, where `SqlApp.csproj` lives), run:
+From the project folder (`src/SqlTrainer.App/`), run:
 
 ```bash
 dotnet publish -c Release -r win-x64 -o ./publish/win-x64
@@ -70,20 +70,20 @@ This produces:
 
 ```
 publish/win-x64/
-  SqlApp.exe          <- this is the entire app. Run it.
+  SqlTrainer.App.exe          <- this is the entire app. Run it.
   appsettings.json     <- optional (logging config); safe to delete if you don't need it
 ```
 
 To make the resulting `.exe` work straight out of the box, the .NET runtime and all the static web assets (CSS, JS, favicon) are embedded inside the `.exe` itself.
 
-The resulting `SqlApp.exe` will be ~50MB in size.
+The resulting `SqlTrainer.App.exe` will be ~50MB in size.
 
 
-> Note: `SqlApp.exe` is ~50 MB because it embeds the full .NET runtime plus all
+> Note: `SqlTrainer.App.exe` is ~50 MB because it embeds the full .NET runtime plus all
 > static web assets. That's the expected size trade-off for a true single-file,
 > zero-dependency executable.
 
-### What happens when `SqlApp.exe` is run
+### What happens when `SqlTrainer.App.exe` is run
 
 - It starts a local web server bound to `http://localhost:5166`.
 - It automatically opens the default web browser to that URL.

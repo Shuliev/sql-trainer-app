@@ -10,5 +10,7 @@
     <File Path="docs/Konzept Architektur/plan.md" />
     <File Path="docs/Konzept Architektur/STATUS.md" />
   </Folder>
-  <Project Path="SqlApp.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/SqlTrainer.App/SqlTrainer.App.csproj" />
+  </Folder>
 </Solution>
