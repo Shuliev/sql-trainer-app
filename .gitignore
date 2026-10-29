@@ -59,9 +59,11 @@ nunit-*.xml
 # Session guidance (untracked, per-session role doc)
 CLAUDE.md
 /.vs
+/docs/Kundenauftrag Datenbanktrainer.pdf
 
 # Program exports
 publish/
 
 # IDE specific Settings
 .idea/
+*.user

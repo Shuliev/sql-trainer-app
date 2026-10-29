@@ -1,9 +1,14 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
+    <File Path="nuget.config" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/docs/" />
   <Folder Name="/docs/Konzept Architektur/">
+    <File Path="docs/Konzept Architektur/Draft Importformat.md" />
+    <File Path="docs/Konzept Architektur/plan.md" />
     <File Path="docs/Konzept Architektur/STATUS.md" />
   </Folder>
+  <Project Path="SqlApp.csproj" />
 </Solution>
