@@ -1,8 +1,7 @@
 using System.Diagnostics;
 using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Reflection;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.FileProviders;
@@ -12,15 +11,12 @@ using SqlTrainer.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// When the app is launched as the published .exe (no ASPNETCORE_URLS/launchSettings
-// in play), bind to a fixed, well-known localhost port so we know what URL to open.
-var hasExplicitUrls = !string.IsNullOrWhiteSpace(builder.Configuration["ASPNETCORE_URLS"])
-                       || !string.IsNullOrWhiteSpace(builder.Configuration["urls"]);
-const string defaultUrl = "http://localhost:5166";
-if (!hasExplicitUrls)
-{
-    builder.WebHost.UseUrls(defaultUrl);
-}
+// Listen on the loopback interface only, never on other network adapters. Port 0 lets the
+// OS pick a free port, so a second app on the same port can't block the start. A fixed
+// port can be set for debugging, e.g. `dotnet run -- --Port 5166`.
+// This overrides any ASPNETCORE_URLS / --urls / launchSettings address on purpose.
+var port = builder.Configuration.GetValue("Port", 0);
+builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, port));
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
@@ -35,13 +31,8 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-
-app.UseHttpsRedirection();
-
 
 app.UseAntiforgery();
 
@@ -61,26 +52,53 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(typeof(Routes).Assembly);
 
-// Print the local network address(es) so the app can be reached from other devices on the LAN,
-// and (when running as the packaged exe, not `dotnet run` in dev) auto-open the default browser.
+// "Beenden" in the app posts here. Closing the browser tab does not stop the server,
+// so this is the visible way to quit. The plain HTML answer replaces the Blazor page,
+// so the user sees a final message instead of the reconnect dialog.
+app.MapPost("/quit", async (HttpContext context, IAntiforgery antiforgery, IHostApplicationLifetime lifetime) =>
+{
+    if (!await antiforgery.IsRequestValidAsync(context))
+    {
+        return Results.BadRequest();
+    }
+
+    context.Response.OnCompleted(() =>
+    {
+        lifetime.StopApplication();
+        return Task.CompletedTask;
+    });
+
+    return Results.Content(
+        """
+        <!DOCTYPE html>
+        <html lang="de">
+        <head><meta charset="utf-8" /><title>SQL-Trainer beendet</title></head>
+        <body style="font-family: sans-serif; margin: 3rem;">
+            <h1>SQL-Trainer wurde beendet.</h1>
+            <p>Sie können dieses Browserfenster jetzt schließen.</p>
+        </body>
+        </html>
+        """,
+        "text/html; charset=utf-8");
+});
+
+// Show where the app runs and how to stop it, then open the default browser
+// (can be switched off with `--OpenBrowser false`, e.g. for automated runs).
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     var addressFeature = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>();
-    var localIp = GetLocalIPAddress();
-
-    if (addressFeature is not null && localIp is not null)
+    var url = addressFeature?.Addresses.FirstOrDefault();
+    if (url is null)
     {
-        foreach (var address in addressFeature.Addresses)
-        {
-            var uri = new Uri(address);
-            Console.WriteLine($"Accessible at: {uri.Scheme}://{localIp}:{uri.Port}");
-        }
+        return;
     }
 
-    if (!app.Environment.IsDevelopment())
+    Console.WriteLine($"SQL-Trainer läuft unter {url}");
+    Console.WriteLine("Beenden: in der App oben rechts auf \"Beenden\" klicken oder dieses Fenster schließen (Strg+C).");
+
+    if (app.Configuration.GetValue("OpenBrowser", true))
     {
-        var launchUrl = addressFeature?.Addresses.FirstOrDefault() ?? defaultUrl;
-        TryOpenBrowser(launchUrl);
+        TryOpenBrowser(url);
     }
 });
 
@@ -98,30 +116,3 @@ static void TryOpenBrowser(string url)
         Console.WriteLine($"Please open {url} manually.");
     }
 }
-
-static string? GetLocalIPAddress()
-{
-    foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
-    {
-        if (networkInterface.OperationalStatus != OperationalStatus.Up)
-        {
-            continue;
-        }
-
-        if (networkInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-        {
-            continue;
-        }
-
-        foreach (var unicastAddress in networkInterface.GetIPProperties().UnicastAddresses)
-        {
-            if (unicastAddress.Address.AddressFamily == AddressFamily.InterNetwork)
-            {
-                return unicastAddress.Address.ToString();
-            }
-        }
-    }
-
-    return null;
-}
-

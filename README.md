@@ -4,12 +4,12 @@ A Blazor Server (interactive server render mode) web app built with MudBlazor.
 
 ## Short description
 
-#### Start the app with:
+#### Start the app (from `src/SqlTrainer.App/`) with:
 ```bash
 dotnet watch
 ```
 
-#### Publish the app to `./publish/win-x64/SqlTrainer.App.exe` with:
+#### Publish the app (from `src/SqlTrainer.App/`) to `./publish/win-x64/SqlTrainer.App.exe` with:
 ```bash
 dotnet publish -c Release -r win-x64 -o ./publish/win-x64
 ```
@@ -49,12 +49,15 @@ Running with hot reload enabled (automatic browser refresh on code changes):
 dotnet watch
 ```
 
-Running the app will automatically serve it
-at `http://localhost:5166` (or `https://localhost:7011`).
+The app listens on `http://127.0.0.1` only (not reachable from other devices) and on a
+free port picked at start. The console shows the actual URL, and the default browser
+opens it automatically.
 
-It will also make the app available to other devices on the same network at `http://<your-ip>:5166` (or `https://<your-ip>:7011`).
-Your IP will be shown in the console output when the app starts.
-If we want to disable this in the future, go to `Properties/launchSettings.json` and replace `0.0.0.0` with `localhost`.
+Options (command line or `appsettings*.json`):
+- `--Port 5166` uses a fixed port instead of a free one.
+- `--OpenBrowser false` does not open the browser (e.g. for automated runs).
+
+Example: `dotnet run -- --Port 5166 --OpenBrowser false`
 
 ## Publishing to SqlTrainer.App.exe
 
@@ -85,9 +88,10 @@ The resulting `SqlTrainer.App.exe` will be ~50MB in size.
 
 ### What happens when `SqlTrainer.App.exe` is run
 
-- It starts a local web server bound to `http://localhost:5166`.
+- It starts a local web server bound to `http://127.0.0.1` on a free port.
 - It automatically opens the default web browser to that URL.
-- Closing the console window (or pressing `Ctrl+C`) stops the server.
+- "Beenden" (power icon, top right in the app), closing the console window or pressing
+  `Ctrl+C` stops the server. Closing the browser tab does not.
 
 ### Publishing for other platforms
 
