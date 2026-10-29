@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     <!-- Never treat our own publish output (if produced inside the project folder) as project content/globs. -->
     <DefaultItemExcludes>$(DefaultItemExcludes);publish/**</DefaultItemExcludes>

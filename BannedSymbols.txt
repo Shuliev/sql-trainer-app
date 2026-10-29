@@ -1,0 +1,18 @@
+# APIs that must not be used in this repository (checked by Microsoft.CodeAnalysis.BannedApiAnalyzers, rule RS0030).
+# Format: <documentation comment ID>;<reason shown in the build error>
+
+# Blocking on tasks can deadlock the Blazor renderer and wastes server threads.
+M:System.Threading.Tasks.Task.Wait;Use await instead of blocking
+M:System.Threading.Tasks.Task.Wait(System.Int32);Use await instead of blocking
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan);Use await instead of blocking
+M:System.Threading.Tasks.Task.Wait(System.Threading.CancellationToken);Use await instead of blocking
+M:System.Threading.Tasks.Task.Wait(System.Int32,System.Threading.CancellationToken);Use await instead of blocking
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan,System.Threading.CancellationToken);Use await instead of blocking
+P:System.Threading.Tasks.Task`1.Result;Use await instead of blocking
+
+# The app is a hosted web server: stop it through the host so it shuts down cleanly.
+M:System.Environment.Exit(System.Int32);Use IHostApplicationLifetime.StopApplication
+
+# Learner queries must not load native SQLite extensions (plan.md 3.4).
+M:Microsoft.Data.Sqlite.SqliteConnection.EnableExtensions(System.Boolean);SQLite extensions are not allowed
+M:Microsoft.Data.Sqlite.SqliteConnection.LoadExtension(System.String,System.String);SQLite extensions are not allowed
