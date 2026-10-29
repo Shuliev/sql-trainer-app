@@ -41,10 +41,7 @@
   -->
   <Target Name="EmbedStaticWebAssetsAsResources" BeforeTargets="_GenerateCompileInputs" DependsOnTargets="ResolveBuildStaticWebAssets">
     <ItemGroup>
-      <_EmbeddableStaticWebAsset Include="@(StaticWebAsset)"
-        Condition="!$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.gz'))
-                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.br'))
-                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').Contains('.bundle.scp.css'))" />
+      <_EmbeddableStaticWebAsset Include="@(StaticWebAsset)" Condition="!$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.gz'))&#xD;&#xA;                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.br'))&#xD;&#xA;                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').Contains('.bundle.scp.css'))" />
       <_EmbeddableStaticWebAsset>
         <!-- Strip the "#[.{fingerprint}]?"/"!" placeholder markers used by the fingerprinting system. -->
         <_PlainRelativePath>$([System.Text.RegularExpressions.Regex]::Replace('%(_EmbeddableStaticWebAsset.RelativePath)', '#\[\.\{fingerprint(=[^}]*)?\}\][?!]', ''))</_PlainRelativePath>
@@ -77,6 +74,10 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="MudBlazor" Version="9.*" />
+    <ProjectReference Include="..\SqlTrainer.UI\SqlTrainer.UI.csproj" />
+    <ProjectReference Include="..\SqlTrainer.Application\SqlTrainer.Application.csproj" />
+    <ProjectReference Include="..\SqlTrainer.Import\SqlTrainer.Import.csproj" />
+    <ProjectReference Include="..\SqlTrainer.Execution\SqlTrainer.Execution.csproj" />
+    <ProjectReference Include="..\SqlTrainer.Storage\SqlTrainer.Storage.csproj" />
   </ItemGroup>
 </Project>

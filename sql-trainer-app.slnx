@@ -12,5 +12,11 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/SqlTrainer.App/SqlTrainer.App.csproj" />
+    <Project Path="src/SqlTrainer.Application/SqlTrainer.Application.csproj" />
+    <Project Path="src/SqlTrainer.Core/SqlTrainer.Core.csproj" />
+    <Project Path="src/SqlTrainer.Execution/SqlTrainer.Execution.csproj" />
+    <Project Path="src/SqlTrainer.Import/SqlTrainer.Import.csproj" />
+    <Project Path="src/SqlTrainer.Storage/SqlTrainer.Storage.csproj" />
+    <Project Path="src/SqlTrainer.UI/SqlTrainer.UI.csproj" />
   </Folder>
 </Solution>

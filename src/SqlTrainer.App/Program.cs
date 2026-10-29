@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.FileProviders;
 using MudBlazor.Services;
 using SqlTrainer.App.Components;
+using SqlTrainer.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +58,8 @@ app.Environment.WebRootFileProvider = Directory.Exists(app.Environment.WebRootPa
 app.UseStaticFiles();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(typeof(Routes).Assembly);
 
 // Print the local network address(es) so the app can be reached from other devices on the LAN,
 // and (when running as the packaged exe, not `dotnet run` in dev) auto-open the default browser.
