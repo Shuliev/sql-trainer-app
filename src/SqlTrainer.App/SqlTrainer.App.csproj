@@ -18,10 +18,14 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <PublishTrimmed>false</PublishTrimmed>
-    <!-- Keep the publish output lean: no .pdb, no IIS web.config, no dev-only appsettings. -->
+    <!-- Keep the publish output lean: no .pdb, no XML docs, no IIS web.config, no dev-only appsettings.
+         (XML docs are still generated during the build: IDE0005 needs them, see Directory.Build.props.) -->
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <PublishDocumentationFile>false</PublishDocumentationFile>
+    <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
+    <!-- Also skip .pdb/.xml files that come with the referenced SqlTrainer.* projects. -->
+    <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
     <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
   </PropertyGroup>
 
