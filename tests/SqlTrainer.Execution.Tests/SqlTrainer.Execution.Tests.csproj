@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SqlTrainer.Execution\SqlTrainer.Execution.csproj" />
+  </ItemGroup>
+
+</Project>
