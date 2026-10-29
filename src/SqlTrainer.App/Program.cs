@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.FileProviders;
-using MudBlazor.Services;
 using SqlTrainer.App.Components;
 using SqlTrainer.UI;
 
@@ -18,10 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 var port = builder.Configuration.GetValue("Port", 0);
 builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, port));
 
-// Add MudBlazor services
-builder.Services.AddMudServices();
+// Composition root: each layer registers its own services.
+builder.Services.AddSqlTrainerUi();
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
