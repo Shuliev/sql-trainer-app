@@ -1,0 +1,3 @@
+# Test names use the Method_Expectation pattern, so underscores are fine here.
+[*.cs]
+dotnet_diagnostic.CA1707.severity = none

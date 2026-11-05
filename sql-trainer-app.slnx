@@ -1,0 +1,37 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="BannedSymbols.txt" />
+    <File Path="Directory.Build.props" />
+    <File Path="nuget.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/ci.yml" />
+  </Folder>
+  <Folder Name="/docs/" />
+  <Folder Name="/docs/Konzept Architektur/">
+    <File Path="docs/Konzept Architektur/Draft Importformat.md" />
+    <File Path="docs/Konzept Architektur/plan.md" />
+    <File Path="docs/Konzept Architektur/STATUS.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/SqlTrainer.App/SqlTrainer.App.csproj" />
+    <Project Path="src/SqlTrainer.Application/SqlTrainer.Application.csproj" />
+    <Project Path="src/SqlTrainer.Core/SqlTrainer.Core.csproj" />
+    <Project Path="src/SqlTrainer.Execution/SqlTrainer.Execution.csproj" />
+    <Project Path="src/SqlTrainer.Import/SqlTrainer.Import.csproj" />
+    <Project Path="src/SqlTrainer.Storage/SqlTrainer.Storage.csproj" />
+    <Project Path="src/SqlTrainer.UI/SqlTrainer.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SqlTrainer.Application.Tests/SqlTrainer.Application.Tests.csproj" />
+    <Project Path="tests/SqlTrainer.Architecture.Tests/SqlTrainer.Architecture.Tests.csproj" />
+    <Project Path="tests/SqlTrainer.Core.Tests/SqlTrainer.Core.Tests.csproj" />
+    <Project Path="tests/SqlTrainer.Execution.Tests/SqlTrainer.Execution.Tests.csproj" />
+    <Project Path="tests/SqlTrainer.Import.Tests/SqlTrainer.Import.Tests.csproj" />
+    <Project Path="tests/SqlTrainer.Storage.Tests/SqlTrainer.Storage.Tests.csproj" />
+    <Project Path="tests/SqlTrainer.UI.Tests/SqlTrainer.UI.Tests.csproj" />
+  </Folder>
+</Solution>

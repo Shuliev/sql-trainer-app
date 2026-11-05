@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.13.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SqlTrainer.App\SqlTrainer.App.csproj" />
+    <ProjectReference Include="..\..\src\SqlTrainer.Application\SqlTrainer.Application.csproj" />
+    <ProjectReference Include="..\..\src\SqlTrainer.Core\SqlTrainer.Core.csproj" />
+    <ProjectReference Include="..\..\src\SqlTrainer.Execution\SqlTrainer.Execution.csproj" />
+    <ProjectReference Include="..\..\src\SqlTrainer.Import\SqlTrainer.Import.csproj" />
+    <ProjectReference Include="..\..\src\SqlTrainer.Storage\SqlTrainer.Storage.csproj" />
+    <ProjectReference Include="..\..\src\SqlTrainer.UI\SqlTrainer.UI.csproj" />
+  </ItemGroup>
+
+</Project>
