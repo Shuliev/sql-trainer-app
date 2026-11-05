@@ -35,11 +35,11 @@ SqlTrainer.App  (Host, Composition Root)
 
 | Projekt | Zweck | Hängt ab von |
 |---|---|---|
-| `SqlTrainer.Core` | Domänenmodelle (`ExerciseDatabase`, `Exercise`, `Topic`, `ResultSet`, `CheckResult`, …) und die Interfaces, die die anderen Schichten implementieren (`IQueryExecutor`, `IResultComparer`, `IExerciseRepository`, `IExerciseDatabaseRepository`). Keine Logik, die eine Datenbank, Dateien oder eine Oberfläche braucht. | nichts |
-| `SqlTrainer.Application` | Use Cases, die die Module verbinden, z. B. ein Paket importieren, die Abfrage eines Lernenden prüfen, eine Datenbank löschen, eine Aufgabe bearbeiten. Die ViewModels rufen diese Services auf. *(noch leer)* | Core |
-| `SqlTrainer.Import` | Liest ein Importpaket (ZIP mit `beschreibung.txt`, `er_diagramm.png`, `datenbank.sql`, `aufgaben.txt`) und prüft es. Format: [`docs/Konzept Architektur/Draft Importformat.md`](docs/Konzept%20Architektur/Draft%20Importformat.md). *(noch leer)* | Core |
+| `SqlTrainer.Core` | Domänenmodelle (`ExerciseDatabase`, `Exercise`, `Topic`, `ResultSet`, `CheckResult`, …) und die Interfaces, die die anderen Schichten implementieren (`IQueryExecutor`, `IResultComparer`, `IExerciseRepository`, `IExerciseDatabaseRepository`, `IDatabasePackageReader`, `IDatabasePackageStore`). `DatabasePackageFormat` enthält die Regeln des Importpakets (Pflichtdateien, Größenlimit, Name). Keine Logik, die eine Datenbank, Dateien oder eine Oberfläche braucht. | nichts |
+| `SqlTrainer.Application` | Use Cases, die die Module verbinden, z. B. ein Paket importieren, die Abfrage eines Lernenden prüfen, eine Datenbank löschen, eine Aufgabe bearbeiten. Die ViewModels rufen diese Services auf. Bisher: `DatabaseManagementService` (Datenbanken auflisten, ZIP importieren). | Core |
+| `SqlTrainer.Import` | Liest ein Importpaket (ZIP mit `beschreibung.txt`, `er_diagramm.png`, `datenbank.sql`, `aufgaben.txt`) und prüft es. Format: [`docs/Konzept Architektur/Draft Importformat.md`](docs/Konzept%20Architektur/Draft%20Importformat.md). Bisher: `ZipDatabasePackageReader` prüft, dass die vier Pflichtdateien vorhanden sind, und liest sie direkt aus dem ZIP; der Inhalt wird noch nicht validiert. | Core |
 | `SqlTrainer.Execution` | Führt SQL gegen eine Übungsdatenbank in SQLite aus: schreibgeschützt, genau ein `SELECT`, mit Timeout und Zeilenlimit. Vergleicht das Ergebnis des Lernenden mit dem Ergebnis der Musterlösung. *(noch leer)* | Core |
-| `SqlTrainer.Storage` | Speichert Daten auf der Festplatte: `app.db` (Datenbanken und Aufgaben), pro Übungsdatenbank eine SQLite-Datei plus ER-Diagramm, im Datenordner des Benutzers. *(noch leer)* | Core |
+| `SqlTrainer.Storage` | Speichert Daten auf der Festplatte: `app.db` (Datenbanken und Aufgaben), pro Übungsdatenbank eine SQLite-Datei plus ER-Diagramm, im Datenordner des Benutzers. Bisher: `FileSystemDatabasePackageStore` legt hochgeladene Pakete im Ordner `Datenbanken/` ab (siehe unten). | Core |
 | `SqlTrainer.UI` | Razor Class Library: Seiten, Layout und ViewModels (leichtes MVVM, ViewModels als Scoped registriert, eines pro Browser-Tab). | Application |
 | `SqlTrainer.App` | ASP.NET-Core-Host: startet den lokalen Webserver, öffnet den Browser, verdrahtet die Dependency Injection (Composition Root). Erzeugt die Single-File-`.exe`. | alle Projekte oben |
 
@@ -142,3 +142,15 @@ dotnet publish -c Release -r osx-arm64 -o ./publish/osx-arm64
 
 (Der automatische Browserstart und das Single-File-Paket sollten auf diesen Plattformen genauso
 funktionieren.)
+
+## Hochgeladene Datenbanken
+
+Auf der Seite „Datenbanken verwalten“ lässt sich ein Datenbankpaket als `.zip` hochladen
+(z. B. `Name_der_Datenbank.zip`). Es muss `beschreibung.txt`, `er_diagramm.png`, `datenbank.sql`
+und `aufgaben.txt` enthalten (im Root des ZIP oder in genau einem Unterordner). Die Dateien werden
+nach `Datenbanken/Name_der_Datenbank/` gespeichert; eine vorhandene Datenbank mit gleichem Namen
+wird nach Rückfrage ersetzt.
+
+- Veröffentlichte `.exe`: neben `SqlTrainer.App.exe` (ist dieser Ordner nicht beschreibbar, wird
+  `%LOCALAPPDATA%\SqlTrainer\Datenbanken` bzw. `~/.local/share/SqlTrainer/Datenbanken` verwendet).
+- Entwicklung: in `src/SqlTrainer.App/Datenbanken/` (von git ignoriert).

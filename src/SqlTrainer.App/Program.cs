@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.FileProviders;
 using SqlTrainer.App.Components;
+using SqlTrainer.Application;
+using SqlTrainer.Import;
+using SqlTrainer.Storage;
 using SqlTrainer.UI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +21,14 @@ var port = builder.Configuration.GetValue("Port", 0);
 builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, port));
 
 // Composition root: each layer registers its own services.
+// Imported databases go next to the exe; in development next to the project, because
+// AppContext.BaseDirectory would be bin/Debug/..., which gets wiped on clean.
+var databaseDirectory = Path.Combine(
+    builder.Environment.IsDevelopment() ? builder.Environment.ContentRootPath : AppContext.BaseDirectory,
+    FileSystemDatabasePackageStore.FolderName);
+builder.Services.AddSqlTrainerImport();
+builder.Services.AddSqlTrainerStorage(databaseDirectory);
+builder.Services.AddSqlTrainerApplication();
 builder.Services.AddSqlTrainerUi();
 
 builder.Services.AddRazorComponents()

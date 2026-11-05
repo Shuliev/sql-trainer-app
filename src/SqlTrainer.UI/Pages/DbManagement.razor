@@ -1,0 +1,89 @@
+@page "/datenbanken-verwalten"
+@inherits ViewModelComponentBase<DbManagementViewModel>
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Datenbanken verwalten</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Datenbanken verwalten</MudText>
+
+<MudPaper Class="pa-4 my-4">
+    <MudText Typo="Typo.h6">Datenbank hochladen</MudText>
+    <MudText Typo="Typo.body2" Class="mb-3">
+        Lade eine ZIP-Datei (z.&nbsp;B. <code>Name_der_Datenbank.zip</code>) hoch, die folgende Dateien enthält:
+        @string.Join(", ", DbManagementViewModel.RequiredFiles).
+    </MudText>
+
+    <MudFileUpload T="IBrowserFile" Accept=".zip" FilesChanged="UploadFile" MaximumFileCount="1" Disabled="ViewModel.IsUploading">
+        <CustomContent Context="upload">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="ViewModel.IsUploading"
+                       StartIcon="@Icons.Material.Filled.CloudUpload" OnClick="upload.OpenFilePickerAsync">
+                Datenbank hochladen
+            </MudButton>
+        </CustomContent>
+        <SelectedTemplate />
+    </MudFileUpload>
+
+    @if (ViewModel.IsUploading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-3" />
+    }
+</MudPaper>
+
+<MudPaper Class="pa-4 my-4">
+    <MudText Typo="Typo.h6">Gespeicherte Datenbanken</MudText>
+    <MudText Typo="Typo.caption" Class="mb-2">Speicherort: @ViewModel.StorageLocation</MudText>
+    @if (ViewModel.Databases.Count == 0)
+    {
+        <MudText Typo="Typo.body2">Noch keine Datenbanken hochgeladen.</MudText>
+    }
+    else
+    {
+        <MudList T="string" Dense="true">
+            @foreach (var db in ViewModel.Databases)
+            {
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Storage" Text="@db" />
+            }
+        </MudList>
+    }
+</MudPaper>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ViewModel.Load();
+    }
+
+    private async Task UploadFile(IBrowserFile? file)
+    {
+        if (file is null)
+        {
+            return;
+        }
+
+        var error = DbManagementViewModel.ValidateFile(file.Name, file.Size);
+        if (error is not null)
+        {
+            Snackbar.Add(error, Severity.Error);
+            return;
+        }
+
+        var name = DbManagementViewModel.GetDatabaseName(file.Name);
+        if (ViewModel.Exists(name))
+        {
+            var overwrite = await DialogService.ShowMessageBoxAsync(
+                "Datenbank existiert bereits",
+                $"Eine Datenbank mit dem Namen \"{name}\" existiert bereits. Überschreiben?",
+                yesText: "Überschreiben", cancelText: "Abbrechen");
+            if (overwrite != true)
+            {
+                return;
+            }
+        }
+
+        await using var stream = file.OpenReadStream(DbManagementViewModel.MaxUploadBytes);
+        var result = await ViewModel.UploadAsync(stream, name);
+        Snackbar.Add(result.Message, result.Succeeded ? Severity.Success : Severity.Error);
+    }
+}
