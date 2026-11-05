@@ -16,6 +16,42 @@ dotnet publish -c Release -r win-x64 -o ./publish/win-x64
 
 ## Long Description
 
+## Architecture
+
+The app runs locally: an ASP.NET Core host serves a Blazor Server UI (MudBlazor) to the
+browser on `127.0.0.1`. Exercise databases are SQLite files. There is no cloud part.
+
+The solution is split into layers. Dependencies only point inwards, towards
+`SqlTrainer.Core`:
+
+```
+SqlTrainer.App  (host, composition root)
+  ├─► SqlTrainer.UI ──► SqlTrainer.Application ──► SqlTrainer.Core
+  └─► SqlTrainer.Import, SqlTrainer.Execution, SqlTrainer.Storage ──► SqlTrainer.Core
+```
+
+### Projects in `src/`
+
+| Project | Purpose | Depends on |
+|---|---|---|
+| `SqlTrainer.Core` | Domain models (`ExerciseDatabase`, `Exercise`, `Topic`, `ResultSet`, `CheckResult`, …) and the interfaces the other layers implement (`IQueryExecutor`, `IResultComparer`, `IExerciseRepository`, `IExerciseDatabaseRepository`). No logic that needs a database, files or UI. | nothing |
+| `SqlTrainer.Application` | Use cases that connect the modules, e.g. import a package, check a learner's query, delete a database, edit an exercise. ViewModels call these services. *(empty so far)* | Core |
+| `SqlTrainer.Import` | Reads an import package (ZIP with `beschreibung.txt`, `er_diagramm.png`, `datenbank.sql`, `aufgaben.txt`) and validates it. Format: [`docs/Konzept Architektur/Draft Importformat.md`](docs/Konzept%20Architektur/Draft%20Importformat.md). *(empty so far)* | Core |
+| `SqlTrainer.Execution` | Runs SQL against an exercise database in SQLite: read-only, one `SELECT`, with timeout and row limit. Compares the learner's result with the model solution's result. *(empty so far)* | Core |
+| `SqlTrainer.Storage` | Stores data on disk: `app.db` (databases and exercises), one SQLite file plus ER diagram per exercise database, in the user's data folder. *(empty so far)* | Core |
+| `SqlTrainer.UI` | Razor class library: pages, layout and ViewModels (light MVVM, ViewModels registered as scoped, one per browser tab). | Application |
+| `SqlTrainer.App` | ASP.NET Core host: starts the local web server, opens the browser, wires up dependency injection (composition root). Builds the single-file `.exe`. | all projects above |
+
+### Projects in `tests/`
+
+Each project in `src/` has a test project `tests/SqlTrainer.<Project>.Tests`.
+`SqlTrainer.Architecture.Tests` uses ArchUnitNET to check the dependency rules: Core depends
+on no other layer; Import, Execution, Storage and Application depend only on Core; UI
+depends neither on the host nor on Import/Execution/Storage. A forbidden reference makes
+these tests fail, locally and in CI.
+
+More background and open decisions: [`docs/Konzept Architektur/plan.md`](docs/Konzept%20Architektur/plan.md).
+
 ## Get started (development)
 
 ### Prerequisites
