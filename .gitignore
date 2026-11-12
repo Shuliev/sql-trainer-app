@@ -67,3 +67,6 @@ publish/
 # IDE specific Settings
 .idea/
 *.user
+
+# Locally uploaded databases
+Datenbanken/

@@ -1,0 +1,13 @@
+Datenbank Onlineshop
+
+In dieser Datenbank werden die Daten von einem kleinen Onlineshop gespeichert. Der Shop verkauft Produkte aus verschiedenen Kategorien (z.B. Elektronik, Bücher, Sport). Kunden können sich registrieren und Bestellungen aufgeben. Eine Bestellung kann aus mehreren Positionen bestehen, also mehreren Produkten mit einer bestimmten Menge.
+
+Tabellen:
+- kunde: die registrierten Kunden mit Name, Stadt und E-Mail
+- kategorie: die Kategorien der Produkte
+- produkt: die Produkte mit Preis und Lagerbestand
+- bestellung: die Bestellungen der Kunden mit Datum und Status (offen, bezahlt, versendet, storniert)
+- bestellposition: die einzelnen Produkte einer Bestellung mit Menge und Einzelpreis
+
+Ein Kunde kann mehrere Bestellungen haben. Zwischen Bestellung und Produkt gibt es eine n:m Beziehung, die über die Tabelle bestellposition aufgelöst wird.
+Das Datum ist im Format JJJJ-MM-TT gespeichert. Manche Kunden haben noch nichts bestellt und manche Produkte wurden noch nie verkauft.

@@ -1,0 +1,325 @@
+##
+#
+1
+#
+SELECT
+#
+Gib alle Filme aus.
+#
+Verwende SELECT * FROM tabelle.
+#
+SELECT * FROM film;
+#
+##
+##
+#
+2
+#
+SELECT
+#
+Gib Titel und Laufzeit aller Filme aus, die länger als zwei Stunden dauern.
+#
+Zwei Stunden sind 120 Minuten.
+#
+SELECT titel, laufzeit_min FROM film WHERE laufzeit_min > 120;
+#
+##
+##
+#
+3
+#
+SELECT
+#
+Gib alle Filme mit einer FSK-Freigabe ab 12 oder niedriger aus, sortiert nach Titel.
+#
+Verwende den Vergleichsoperator <=.
+#
+SELECT titel, fsk FROM film WHERE fsk <= 12 ORDER BY titel;
+#
+##
+##
+#
+4
+#
+SELECT
+#
+Gib alle Vorstellungen aus, die um 20:15 Uhr beginnen.
+#
+Die Uhrzeit ist als Text gespeichert, also in Hochkommas schreiben.
+#
+SELECT * FROM vorstellung WHERE uhrzeit = '20:15';
+#
+##
+##
+#
+5
+#
+SELECT
+#
+Gib alle Filme aus, die weder Horror noch Thriller sind.
+#
+Ausschließen kannst du mit NOT IN ('...', '...').
+#
+SELECT titel, genre FROM film WHERE genre NOT IN ('Horror', 'Thriller');
+#
+##
+##
+#
+6
+#
+AGGREGAT
+#
+Wie viele Tickets wurden insgesamt verkauft?
+#
+COUNT(*) zählt alle Zeilen.
+#
+SELECT COUNT(*) AS verkaufte_tickets FROM ticket;
+#
+##
+##
+#
+7
+#
+AGGREGAT
+#
+Wie lang ist ein Film durchschnittlich (in Minuten, gerundet auf eine ganze Zahl)?
+#
+Kombiniere ROUND() und AVG().
+#
+SELECT ROUND(AVG(laufzeit_min)) AS durchschnitt_min FROM film;
+#
+##
+##
+#
+8
+#
+AGGREGAT
+#
+Wie viele Sitzplätze hat das Kino insgesamt?
+#
+Summiere die Spalte plaetze.
+#
+SELECT SUM(plaetze) AS plaetze_gesamt FROM saal;
+#
+##
+##
+#
+9
+#
+AGGREGAT
+#
+Wie hoch ist der niedrigste und der höchste Eintrittspreis?
+#
+MIN() und MAX() in einer Abfrage.
+#
+SELECT MIN(preis) AS min_preis, MAX(preis) AS max_preis FROM vorstellung;
+#
+##
+##
+#
+10
+#
+AGGREGAT
+#
+Wie viele verschiedene Genres gibt es im Programm?
+#
+COUNT(DISTINCT spalte) zählt jeden Wert nur einmal.
+#
+SELECT COUNT(DISTINCT genre) AS anzahl_genres FROM film;
+#
+##
+##
+#
+11
+#
+JOIN
+#
+Gib alle Vorstellungen mit Datum, Uhrzeit und Filmtitel aus.
+#
+Verbinde vorstellung und film über film_id.
+#
+SELECT v.datum, v.uhrzeit, f.titel FROM vorstellung v INNER JOIN film f ON v.film_id = f.film_id;
+#
+##
+##
+#
+12
+#
+JOIN
+#
+Gib alle Vorstellungen mit Filmtitel und Saalname aus, sortiert nach Datum und Uhrzeit.
+#
+Zwei JOINs: vorstellung-film und vorstellung-saal. ORDER BY mit zwei Spalten.
+#
+SELECT v.datum, v.uhrzeit, f.titel, s.name AS saal FROM vorstellung v INNER JOIN film f ON v.film_id = f.film_id INNER JOIN saal s ON v.saal_id = s.saal_id ORDER BY v.datum, v.uhrzeit;
+#
+##
+##
+#
+13
+#
+JOIN
+#
+Gib alle Tickets mit Sitzplatz sowie Vor- und Nachname des Kunden aus.
+#
+Verbinde ticket und kunde über kunde_id.
+#
+SELECT t.ticket_id, t.sitzplatz, k.vorname, k.nachname FROM ticket t INNER JOIN kunde k ON t.kunde_id = k.kunde_id;
+#
+##
+##
+#
+14
+#
+JOIN
+#
+Gib alle Filme mit den IDs ihrer Vorstellungen aus. Filme ohne Vorstellung sollen ebenfalls erscheinen.
+#
+LEFT JOIN behält alle Filme.
+#
+SELECT f.titel, v.vorstellung_id FROM film f LEFT JOIN vorstellung v ON f.film_id = v.film_id;
+#
+##
+##
+#
+15
+#
+JOIN
+#
+Welche Filme hat Selin Kaya gesehen? Jeder Titel nur einmal.
+#
+Vier Tabellen: kunde, ticket, vorstellung, film. Verwende DISTINCT.
+#
+SELECT DISTINCT f.titel FROM kunde k INNER JOIN ticket t ON k.kunde_id = t.kunde_id INNER JOIN vorstellung v ON t.vorstellung_id = v.vorstellung_id INNER JOIN film f ON v.film_id = f.film_id WHERE k.vorname = 'Selin' AND k.nachname = 'Kaya';
+#
+##
+##
+#
+16
+#
+GRUPPIERUNG
+#
+Wie viele Filme gibt es je Genre?
+#
+GROUP BY genre mit COUNT(*).
+#
+SELECT genre, COUNT(*) AS anzahl FROM film GROUP BY genre;
+#
+##
+##
+#
+17
+#
+GRUPPIERUNG
+#
+Wie viele Tickets wurden je Vorstellung verkauft? Sortiere absteigend nach Anzahl.
+#
+Gruppiere ticket nach vorstellung_id.
+#
+SELECT vorstellung_id, COUNT(*) AS anzahl FROM ticket GROUP BY vorstellung_id ORDER BY anzahl DESC;
+#
+##
+##
+#
+18
+#
+GRUPPIERUNG
+#
+Wie hoch ist der Ticketumsatz je Film? Gib Filmtitel und Umsatz aus.
+#
+Der Preis steht in vorstellung. Verbinde ticket, vorstellung und film und summiere den Preis.
+#
+SELECT f.titel, SUM(v.preis) AS umsatz FROM ticket t INNER JOIN vorstellung v ON t.vorstellung_id = v.vorstellung_id INNER JOIN film f ON v.film_id = f.film_id GROUP BY f.titel ORDER BY umsatz DESC;
+#
+##
+##
+#
+19
+#
+GRUPPIERUNG
+#
+Welche Kunden haben mehr als fünf Tickets gekauft? Gib Nachname und Anzahl aus.
+#
+JOIN von kunde und ticket, GROUP BY je Kunde, dann HAVING.
+#
+SELECT k.nachname, COUNT(*) AS anzahl FROM kunde k INNER JOIN ticket t ON k.kunde_id = t.kunde_id GROUP BY k.kunde_id, k.nachname HAVING COUNT(*) > 5;
+#
+##
+##
+#
+20
+#
+GRUPPIERUNG
+#
+In welchen Sälen finden mindestens sechs Vorstellungen statt? Gib Saalname und Anzahl aus.
+#
+JOIN von saal und vorstellung, GROUP BY Saal und HAVING COUNT(*) >= 6.
+#
+SELECT s.name, COUNT(*) AS anzahl FROM saal s INNER JOIN vorstellung v ON s.saal_id = v.saal_id GROUP BY s.saal_id, s.name HAVING COUNT(*) >= 6;
+#
+##
+##
+#
+21
+#
+SUBSELECT
+#
+Gib alle Filme aus, die länger sind als die durchschnittliche Laufzeit.
+#
+Berechne AVG(laufzeit_min) in einer Unterabfrage.
+#
+SELECT titel, laufzeit_min FROM film WHERE laufzeit_min > (SELECT AVG(laufzeit_min) FROM film);
+#
+##
+##
+#
+22
+#
+SUBSELECT
+#
+Welche Filme haben noch keine Vorstellung?
+#
+Verwende NOT IN mit einer Unterabfrage auf vorstellung.
+#
+SELECT titel FROM film WHERE film_id NOT IN (SELECT film_id FROM vorstellung);
+#
+##
+##
+#
+23
+#
+SUBSELECT
+#
+Welche Kunden haben noch nie ein Ticket gekauft?
+#
+Prüfe kunde_id gegen die IDs in ticket.
+#
+SELECT vorname, nachname FROM kunde WHERE kunde_id NOT IN (SELECT kunde_id FROM ticket);
+#
+##
+##
+#
+24
+#
+SUBSELECT
+#
+Welcher Film hat die längste Laufzeit?
+#
+Ermittle MAX(laufzeit_min) in einer Unterabfrage.
+#
+SELECT titel, laufzeit_min FROM film WHERE laufzeit_min = (SELECT MAX(laufzeit_min) FROM film);
+#
+##
+##
+#
+25
+#
+SUBSELECT
+#
+Gib alle Vorstellungen von Komödien aus (Vorstellungs-ID, Datum, Uhrzeit), ohne einen JOIN zu verwenden.
+#
+Mehrere Filme sind Komödien, daher brauchst du IN statt =.
+#
+SELECT vorstellung_id, datum, uhrzeit FROM vorstellung WHERE film_id IN (SELECT film_id FROM film WHERE genre = 'Komödie');
+#
+##

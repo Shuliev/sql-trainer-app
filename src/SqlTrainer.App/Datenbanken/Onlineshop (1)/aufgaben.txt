@@ -1,0 +1,325 @@
+##
+#
+1
+#
+SELECT
+#
+Gib alle Kunden aus.
+#
+Verwende SELECT * FROM tabelle.
+#
+SELECT * FROM kunde;
+#
+##
+##
+#
+2
+#
+SELECT
+#
+Gib Vor- und Nachname aller Kunden aus, die in Essen wohnen.
+#
+Wähle gezielt Spalten aus und filtere mit WHERE stadt = '...'.
+#
+SELECT vorname, nachname FROM kunde WHERE stadt = 'Essen';
+#
+##
+##
+#
+3
+#
+SELECT
+#
+Gib Name und Preis aller Produkte aus, die mehr als 50 Euro kosten. Sortiere absteigend nach Preis.
+#
+Kombiniere WHERE mit ORDER BY ... DESC.
+#
+SELECT name, preis FROM produkt WHERE preis > 50 ORDER BY preis DESC;
+#
+##
+##
+#
+4
+#
+SELECT
+#
+Gib alle Produkte aus, deren Lagerbestand zwischen 10 und 30 Stück liegt (Grenzen eingeschlossen).
+#
+Der Operator BETWEEN ... AND ... schließt beide Grenzen ein.
+#
+SELECT * FROM produkt WHERE lagerbestand BETWEEN 10 AND 30;
+#
+##
+##
+#
+5
+#
+SELECT
+#
+Gib Vorname, Nachname und E-Mail aller Kunden aus, deren E-Mail-Adresse auf '@web.de' endet.
+#
+Mit LIKE und dem Platzhalter % lassen sich Textmuster suchen.
+#
+SELECT vorname, nachname, email FROM kunde WHERE email LIKE '%@web.de';
+#
+##
+##
+#
+6
+#
+AGGREGAT
+#
+Wie viele Kunden sind im Shop registriert?
+#
+COUNT(*) zählt alle Zeilen einer Tabelle.
+#
+SELECT COUNT(*) AS anzahl_kunden FROM kunde;
+#
+##
+##
+#
+7
+#
+AGGREGAT
+#
+Ermittle den Durchschnittspreis aller Produkte, gerundet auf zwei Nachkommastellen.
+#
+Kombiniere AVG() mit ROUND(wert, 2).
+#
+SELECT ROUND(AVG(preis), 2) AS durchschnittspreis FROM produkt;
+#
+##
+##
+#
+8
+#
+AGGREGAT
+#
+Ermittle den höchsten und den niedrigsten Produktpreis in einer Abfrage.
+#
+MAX() und MIN() können in derselben SELECT-Liste stehen.
+#
+SELECT MAX(preis) AS hoechster_preis, MIN(preis) AS niedrigster_preis FROM produkt;
+#
+##
+##
+#
+9
+#
+AGGREGAT
+#
+Berechne den Gesamtwert des Lagers (Preis mal Lagerbestand aller Produkte), gerundet auf zwei Nachkommastellen.
+#
+Innerhalb von SUM() darf ein Rechenausdruck stehen.
+#
+SELECT ROUND(SUM(preis * lagerbestand), 2) AS lagerwert FROM produkt;
+#
+##
+##
+#
+10
+#
+AGGREGAT
+#
+Wie viele Bestellungen haben den Status 'versendet'?
+#
+Filtere mit WHERE, bevor COUNT() zählt.
+#
+SELECT COUNT(*) AS anzahl FROM bestellung WHERE status = 'versendet';
+#
+##
+##
+#
+11
+#
+JOIN
+#
+Gib zu jedem Produkt den Produktnamen und den Namen seiner Kategorie aus.
+#
+Verbinde produkt und kategorie über kategorie_id mit INNER JOIN.
+#
+SELECT p.name AS produkt, k.name AS kategorie FROM produkt p INNER JOIN kategorie k ON p.kategorie_id = k.kategorie_id;
+#
+##
+##
+#
+12
+#
+JOIN
+#
+Gib alle Bestellungen mit Bestellnummer, Bestelldatum sowie Vor- und Nachname des Kunden aus.
+#
+Die Verknüpfung erfolgt über kunde_id.
+#
+SELECT b.bestellung_id, b.bestelldatum, k.vorname, k.nachname FROM bestellung b INNER JOIN kunde k ON b.kunde_id = k.kunde_id;
+#
+##
+##
+#
+13
+#
+JOIN
+#
+Gib für die Bestellung mit der Nummer 1 alle Positionen mit Produktname, Menge und Einzelpreis aus.
+#
+Verbinde bestellposition mit produkt und filtere auf bestellung_id = 1.
+#
+SELECT p.name, bp.menge, bp.einzelpreis FROM bestellposition bp INNER JOIN produkt p ON bp.produkt_id = p.produkt_id WHERE bp.bestellung_id = 1;
+#
+##
+##
+#
+14
+#
+JOIN
+#
+Gib alle Kunden mit ihren Bestellnummern aus. Kunden ohne Bestellung sollen ebenfalls erscheinen.
+#
+Ein LEFT JOIN behält alle Zeilen der linken Tabelle, auch ohne Partner.
+#
+SELECT k.vorname, k.nachname, b.bestellung_id FROM kunde k LEFT JOIN bestellung b ON k.kunde_id = b.kunde_id;
+#
+##
+##
+#
+15
+#
+JOIN
+#
+Welche Produkte hat der Kunde Lukas Müller bestellt? Jedes Produkt soll nur einmal erscheinen.
+#
+Du brauchst vier Tabellen: kunde, bestellung, bestellposition, produkt. Doppelte vermeidest du mit DISTINCT.
+#
+SELECT DISTINCT p.name FROM kunde k INNER JOIN bestellung b ON k.kunde_id = b.kunde_id INNER JOIN bestellposition bp ON b.bestellung_id = bp.bestellung_id INNER JOIN produkt p ON bp.produkt_id = p.produkt_id WHERE k.vorname = 'Lukas' AND k.nachname = 'Müller';
+#
+##
+##
+#
+16
+#
+GRUPPIERUNG
+#
+Wie viele Produkte gibt es je Kategorie? Gib die Kategorie-ID und die Anzahl aus.
+#
+Gruppiere mit GROUP BY kategorie_id und zähle mit COUNT(*).
+#
+SELECT kategorie_id, COUNT(*) AS anzahl FROM produkt GROUP BY kategorie_id;
+#
+##
+##
+#
+17
+#
+GRUPPIERUNG
+#
+Wie viele Kunden wohnen in jeder Stadt? Sortiere absteigend nach Anzahl.
+#
+GROUP BY stadt, danach ORDER BY auf den Zählwert.
+#
+SELECT stadt, COUNT(*) AS anzahl FROM kunde GROUP BY stadt ORDER BY anzahl DESC;
+#
+##
+##
+#
+18
+#
+GRUPPIERUNG
+#
+Berechne für jede Bestellung den Gesamtwert (Summe aus Menge mal Einzelpreis), gerundet auf zwei Nachkommastellen.
+#
+Gruppiere bestellposition nach bestellung_id und summiere menge * einzelpreis.
+#
+SELECT bestellung_id, ROUND(SUM(menge * einzelpreis), 2) AS gesamtwert FROM bestellposition GROUP BY bestellung_id;
+#
+##
+##
+#
+19
+#
+GRUPPIERUNG
+#
+Welche Kategorien enthalten mindestens drei Produkte? Gib den Kategorienamen und die Anzahl aus.
+#
+Bedingungen auf Gruppen formulierst du mit HAVING, nicht mit WHERE.
+#
+SELECT k.name, COUNT(*) AS anzahl FROM kategorie k INNER JOIN produkt p ON k.kategorie_id = p.kategorie_id GROUP BY k.name HAVING COUNT(*) >= 3;
+#
+##
+##
+#
+20
+#
+GRUPPIERUNG
+#
+Welche Kunden haben insgesamt für mehr als 500 Euro bestellt? Gib Nachname und Umsatz aus, absteigend sortiert.
+#
+Verbinde kunde, bestellung und bestellposition, gruppiere je Kunde und filtere mit HAVING SUM(...) > 500.
+#
+SELECT k.nachname, ROUND(SUM(bp.menge * bp.einzelpreis), 2) AS umsatz FROM kunde k INNER JOIN bestellung b ON k.kunde_id = b.kunde_id INNER JOIN bestellposition bp ON b.bestellung_id = bp.bestellung_id GROUP BY k.kunde_id, k.nachname HAVING SUM(bp.menge * bp.einzelpreis) > 500 ORDER BY umsatz DESC;
+#
+##
+##
+#
+21
+#
+SUBSELECT
+#
+Gib alle Produkte aus, die teurer sind als der Durchschnittspreis aller Produkte.
+#
+Berechne den Durchschnitt in einer Unterabfrage im WHERE-Teil.
+#
+SELECT name, preis FROM produkt WHERE preis > (SELECT AVG(preis) FROM produkt);
+#
+##
+##
+#
+22
+#
+SUBSELECT
+#
+Gib alle Kunden aus, die noch nie eine Bestellung aufgegeben haben.
+#
+Prüfe mit NOT IN gegen die Liste der kunde_id-Werte aus bestellung.
+#
+SELECT vorname, nachname FROM kunde WHERE kunde_id NOT IN (SELECT kunde_id FROM bestellung);
+#
+##
+##
+#
+23
+#
+SUBSELECT
+#
+Welche Produkte wurden noch nie bestellt?
+#
+Die bestellten Produkte stehen in bestellposition.
+#
+SELECT name FROM produkt WHERE produkt_id NOT IN (SELECT produkt_id FROM bestellposition);
+#
+##
+##
+#
+24
+#
+SUBSELECT
+#
+Gib die Bestellung mit dem jüngsten Bestelldatum aus (Bestellnummer, Datum, Status).
+#
+Ermittle MAX(bestelldatum) in einer Unterabfrage.
+#
+SELECT bestellung_id, bestelldatum, status FROM bestellung WHERE bestelldatum = (SELECT MAX(bestelldatum) FROM bestellung);
+#
+##
+##
+#
+25
+#
+SUBSELECT
+#
+Gib alle Produkte der Kategorie 'Elektronik' aus, ohne einen JOIN zu verwenden.
+#
+Ermittle die passende kategorie_id über eine Unterabfrage auf kategorie.
+#
+SELECT name, preis FROM produkt WHERE kategorie_id = (SELECT kategorie_id FROM kategorie WHERE name = 'Elektronik');
+#
+##

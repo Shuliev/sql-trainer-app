@@ -1,0 +1,12 @@
+Datenbank Bibliothek
+
+Die Datenbank gehört zu einer Stadtbibliothek. Gespeichert werden die Bücher, die Autoren, die Mitglieder der Bibliothek und alle Ausleihen. So kann man z.B. sehen welche Bücher oft ausgeliehen werden oder welche Bücher gerade nicht da sind.
+
+Tabellen:
+- autor: die Autoren mit Name und Land
+- buch: die Bücher mit Titel, Genre, Erscheinungsjahr und Seitenanzahl
+- mitglied: die Mitglieder der Bibliothek mit Wohnort und Beitrittsdatum
+- ausleihe: die Ausleihen mit Ausleihdatum und Rückgabedatum
+
+Ein Autor kann mehrere Bücher geschrieben haben. Mitglieder und Bücher haben eine n:m Beziehung über die Tabelle ausleihe.
+Wenn das Rückgabedatum leer (NULL) ist, wurde das Buch noch nicht zurückgegeben. Das Datum ist im Format JJJJ-MM-TT gespeichert.

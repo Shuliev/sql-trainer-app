@@ -1,0 +1,13 @@
+Datenbank Schule
+
+In dieser Datenbank werden die Daten von einem Berufskolleg verwaltet. Es gibt Klassen, Lehrer, Schüler, Fächer und Noten. Jede Klasse hat einen Klassenlehrer und einen festen Raum. Für die Schüler werden Noten in verschiedenen Fächern eingetragen.
+
+Tabellen:
+- lehrer: die Lehrer mit Name und Kürzel
+- klasse: die Klassen mit Bezeichnung, Raum und Klassenlehrer
+- schueler: die Schüler mit Geburtsdatum und Klasse
+- fach: die Fächer und welcher Lehrer dafür zuständig ist
+- note: die Noten von 1 bis 6 mit Datum
+
+Eine Klasse hat mehrere Schüler. Ein Lehrer kann mehrere Fächer haben. Zwischen Schüler und Fach gibt es eine n:m Beziehung über die Tabelle note.
+Das Datum ist im Format JJJJ-MM-TT gespeichert. Für ein paar Schüler gibt es noch keine Noten.

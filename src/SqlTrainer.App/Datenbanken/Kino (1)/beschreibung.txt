@@ -1,0 +1,13 @@
+Datenbank Kino
+
+In dieser Datenbank werden die Daten von einem Kino gespeichert. Das Kino hat drei Säle und zeigt verschiedene Filme. Für jeden Film gibt es Vorstellungen mit Datum, Uhrzeit und Preis. Kunden können Tickets für die Vorstellungen kaufen. Die Filmtitel sind ausgedacht.
+
+Tabellen:
+- film: die Filme mit Genre, Laufzeit in Minuten und FSK
+- saal: die Kinosäle mit Anzahl Plätze
+- vorstellung: die Vorstellungen mit Datum, Uhrzeit und Preis
+- kunde: die Kunden mit Geburtsjahr und Wohnort
+- ticket: die verkauften Tickets mit Sitzplatz
+
+Ein Film kann in mehreren Vorstellungen laufen und in einem Saal gibt es mehrere Vorstellungen. Zwischen Kunde und Vorstellung gibt es eine n:m Beziehung über die Tabelle ticket.
+Das Datum ist im Format JJJJ-MM-TT gespeichert, die Uhrzeit als HH:MM.
