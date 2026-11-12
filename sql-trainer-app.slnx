@@ -11,6 +11,37 @@
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/ci.yml" />
   </Folder>
+  <Folder Name="/contracts/" />
+  <Folder Name="/contracts/databases/Bibliothek (1)/">
+    <File Path="src\SqlTrainer.App\Datenbanken\Bibliothek (1)\aufgaben.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Bibliothek (1)\beschreibung.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Bibliothek (1)\datenbank.sql" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Bibliothek (1)\er_diagramm.png" />
+  </Folder>
+  <Folder Name="/contracts/databases/Kino (1)/">
+    <File Path="src\SqlTrainer.App\Datenbanken\Kino (1)\aufgaben.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Kino (1)\beschreibung.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Kino (1)\datenbank.sql" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Kino (1)\er_diagramm.png" />
+  </Folder>
+  <Folder Name="/contracts/databases/Onlineshop (1)/">
+    <File Path="src\SqlTrainer.App\Datenbanken\Onlineshop (1)\aufgaben.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Onlineshop (1)\beschreibung.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Onlineshop (1)\datenbank.sql" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Onlineshop (1)\er_diagramm.png" />
+  </Folder>
+  <Folder Name="/contracts/databases/Schule (1)/">
+    <File Path="src\SqlTrainer.App\Datenbanken\Schule (1)\aufgaben.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Schule (1)\beschreibung.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Schule (1)\datenbank.sql" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Schule (1)\er_diagramm.png" />
+  </Folder>
+  <Folder Name="/contracts/databases/Fuhrpark (1) 1/">
+    <File Path="src\SqlTrainer.App\Datenbanken\Fuhrpark (1) 1\aufgaben.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Fuhrpark (1) 1\beschreibung.txt" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Fuhrpark (1) 1\datenbank.sql" />
+    <File Path="src\SqlTrainer.App\Datenbanken\Fuhrpark (1) 1\er_diagramm.png" />
+  </Folder>
   <Folder Name="/docs/" />
   <Folder Name="/docs/Konzept Architektur/">
     <File Path="docs/Konzept Architektur/Draft Importformat.md" />
