@@ -1,0 +1,13 @@
+Datenbank Fuhrpark
+
+Die Datenbank gehört zu einer Logistikfirma mit eigenem Fuhrpark. Die Mitarbeiter benutzen die Firmenfahrzeuge für Dienstfahrten. Jede Fahrt wird mit Datum, Kilometern und Zweck gespeichert. Außerdem werden die Wartungen und Reparaturen der Fahrzeuge mit den Kosten gespeichert.
+
+Tabellen:
+- abteilung: die Abteilungen der Firma
+- mitarbeiter: die Mitarbeiter mit Führerscheinklasse und Abteilung
+- fahrzeug: die Fahrzeuge mit Kennzeichen, Marke, Modell, Baujahr, Kilometerstand und Kraftstoff
+- fahrt: die Dienstfahrten
+- wartung: die Wartungen und Reparaturen mit Kosten
+
+Eine Abteilung hat mehrere Mitarbeiter. Zwischen Mitarbeiter und Fahrzeug gibt es eine n:m Beziehung über die Tabelle fahrt. Ein Fahrzeug kann mehrere Wartungen haben.
+Das Datum ist im Format JJJJ-MM-TT gespeichert.

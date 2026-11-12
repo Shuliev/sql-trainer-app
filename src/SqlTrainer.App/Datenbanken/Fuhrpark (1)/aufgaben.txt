@@ -1,0 +1,325 @@
+##
+#
+1
+#
+SELECT
+#
+Gib alle Fahrzeuge aus.
+#
+Verwende SELECT * FROM tabelle.
+#
+SELECT * FROM fahrzeug;
+#
+##
+##
+#
+2
+#
+SELECT
+#
+Gib Kennzeichen, Marke und Modell aller Dieselfahrzeuge aus.
+#
+Filtere mit WHERE kraftstoff = '...'.
+#
+SELECT kennzeichen, marke, modell FROM fahrzeug WHERE kraftstoff = 'Diesel';
+#
+##
+##
+#
+3
+#
+SELECT
+#
+Gib alle Fahrzeuge mit mehr als 100.000 km aus, absteigend sortiert nach Kilometerstand.
+#
+Zahlen schreibst du in SQL ohne Tausenderpunkt.
+#
+SELECT kennzeichen, kilometerstand FROM fahrzeug WHERE kilometerstand > 100000 ORDER BY kilometerstand DESC;
+#
+##
+##
+#
+4
+#
+SELECT
+#
+Gib alle Fahrzeuge aus, die mit Elektro oder Hybrid angetrieben werden.
+#
+Mehrere erlaubte Werte prüfst du mit IN ('...', '...').
+#
+SELECT kennzeichen, modell, kraftstoff FROM fahrzeug WHERE kraftstoff IN ('Elektro', 'Hybrid');
+#
+##
+##
+#
+5
+#
+SELECT
+#
+Gib alle Fahrten aus, die im März 2025 stattgefunden haben.
+#
+Nutze BETWEEN '2025-03-01' AND '2025-03-31'.
+#
+SELECT * FROM fahrt WHERE datum BETWEEN '2025-03-01' AND '2025-03-31';
+#
+##
+##
+#
+6
+#
+AGGREGAT
+#
+Wie viele Fahrzeuge umfasst der Fuhrpark?
+#
+COUNT(*) zählt alle Zeilen.
+#
+SELECT COUNT(*) AS anzahl_fahrzeuge FROM fahrzeug;
+#
+##
+##
+#
+7
+#
+AGGREGAT
+#
+Wie viele Kilometer wurden bei allen Dienstfahrten zusammen gefahren?
+#
+Summiere die Spalte kilometer.
+#
+SELECT SUM(kilometer) AS gesamt_km FROM fahrt;
+#
+##
+##
+#
+8
+#
+AGGREGAT
+#
+Wie hoch waren die Wartungskosten insgesamt und im Durchschnitt (gerundet auf zwei Nachkommastellen)?
+#
+SUM() und AVG() lassen sich in einer Abfrage kombinieren.
+#
+SELECT ROUND(SUM(kosten), 2) AS gesamt, ROUND(AVG(kosten), 2) AS durchschnitt FROM wartung;
+#
+##
+##
+#
+9
+#
+AGGREGAT
+#
+Wie alt ist das älteste Fahrzeug? Gib das kleinste Baujahr aus.
+#
+MIN() liefert den kleinsten Wert.
+#
+SELECT MIN(baujahr) AS aeltestes_baujahr FROM fahrzeug;
+#
+##
+##
+#
+10
+#
+AGGREGAT
+#
+Was war die längste einzelne Dienstfahrt in Kilometern?
+#
+MAX() liefert den größten Wert.
+#
+SELECT MAX(kilometer) AS laengste_fahrt FROM fahrt;
+#
+##
+##
+#
+11
+#
+JOIN
+#
+Gib alle Mitarbeitern mit dem Namen ihrer Abteilung aus.
+#
+Verbinde mitarbeiter und abteilung über abteilung_id.
+#
+SELECT m.vorname, m.nachname, a.name AS abteilung FROM mitarbeiter m INNER JOIN abteilung a ON m.abteilung_id = a.abteilung_id;
+#
+##
+##
+#
+12
+#
+JOIN
+#
+Gib alle Fahrten mit Datum, Kennzeichen, Nachname des Fahrers und gefahrenen Kilometern aus.
+#
+Verbinde fahrt mit fahrzeug und mit mitarbeiter.
+#
+SELECT f.datum, fz.kennzeichen, m.nachname, f.kilometer FROM fahrt f INNER JOIN fahrzeug fz ON f.fahrzeug_id = fz.fahrzeug_id INNER JOIN mitarbeiter m ON f.mitarbeiter_id = m.mitarbeiter_id;
+#
+##
+##
+#
+13
+#
+JOIN
+#
+Gib alle Wartungen mit Kennzeichen, Modell, Art und Kosten aus, sortiert nach Datum.
+#
+Verbinde wartung und fahrzeug.
+#
+SELECT w.datum, fz.kennzeichen, fz.modell, w.art, w.kosten FROM wartung w INNER JOIN fahrzeug fz ON w.fahrzeug_id = fz.fahrzeug_id ORDER BY w.datum;
+#
+##
+##
+#
+14
+#
+JOIN
+#
+Gib alle Fahrzeuge mit ihren Wartungsterminen aus. Fahrzeuge ohne Wartung sollen ebenfalls erscheinen.
+#
+LEFT JOIN behält alle Fahrzeuge.
+#
+SELECT fz.kennzeichen, w.datum, w.art FROM fahrzeug fz LEFT JOIN wartung w ON fz.fahrzeug_id = w.fahrzeug_id;
+#
+##
+##
+#
+15
+#
+JOIN
+#
+Welche Fahrzeuge (Kennzeichen) wurden von Mitarbeitern der Abteilung Logistik gefahren? Jedes Kennzeichen nur einmal.
+#
+Vier Tabellen: fahrt, fahrzeug, mitarbeiter, abteilung. Doppelte entfernst du mit DISTINCT.
+#
+SELECT DISTINCT fz.kennzeichen FROM fahrt f INNER JOIN fahrzeug fz ON f.fahrzeug_id = fz.fahrzeug_id INNER JOIN mitarbeiter m ON f.mitarbeiter_id = m.mitarbeiter_id INNER JOIN abteilung a ON m.abteilung_id = a.abteilung_id WHERE a.name = 'Logistik';
+#
+##
+##
+#
+16
+#
+GRUPPIERUNG
+#
+Wie viele Fahrzeuge gibt es je Kraftstoffart?
+#
+GROUP BY kraftstoff mit COUNT(*).
+#
+SELECT kraftstoff, COUNT(*) AS anzahl FROM fahrzeug GROUP BY kraftstoff;
+#
+##
+##
+#
+17
+#
+GRUPPIERUNG
+#
+Wie viele Kilometer wurden je Fahrzeug gefahren? Gib Kennzeichen und Summe aus, absteigend sortiert.
+#
+JOIN von fahrt und fahrzeug, danach GROUP BY Kennzeichen.
+#
+SELECT fz.kennzeichen, SUM(f.kilometer) AS km_gesamt FROM fahrt f INNER JOIN fahrzeug fz ON f.fahrzeug_id = fz.fahrzeug_id GROUP BY fz.kennzeichen ORDER BY km_gesamt DESC;
+#
+##
+##
+#
+18
+#
+GRUPPIERUNG
+#
+Wie hoch sind die Wartungskosten je Wartungsart?
+#
+Gruppiere wartung nach art.
+#
+SELECT art, ROUND(SUM(kosten), 2) AS kosten_gesamt FROM wartung GROUP BY art;
+#
+##
+##
+#
+19
+#
+GRUPPIERUNG
+#
+Für welche Fahrzeuge lagen die Wartungskosten insgesamt über 1.000 Euro? Gib die Fahrzeug-ID und die Summe aus.
+#
+Bedingungen auf Summen formulierst du mit HAVING.
+#
+SELECT fahrzeug_id, ROUND(SUM(kosten), 2) AS kosten_gesamt FROM wartung GROUP BY fahrzeug_id HAVING SUM(kosten) > 1000;
+#
+##
+##
+#
+20
+#
+GRUPPIERUNG
+#
+Welche Mitarbeitern haben mindestens vier Fahrten unternommen? Gib Nachname und Anzahl der Fahrten aus.
+#
+JOIN von mitarbeiter und fahrt, GROUP BY je Person und HAVING COUNT(*) >= 4.
+#
+SELECT m.nachname, COUNT(*) AS anzahl_fahrten FROM mitarbeiter m INNER JOIN fahrt f ON m.mitarbeiter_id = f.mitarbeiter_id GROUP BY m.mitarbeiter_id, m.nachname HAVING COUNT(*) >= 4;
+#
+##
+##
+#
+21
+#
+SUBSELECT
+#
+Gib alle Fahrten aus, die länger waren als die durchschnittliche Fahrtstrecke.
+#
+Berechne AVG(kilometer) in einer Unterabfrage.
+#
+SELECT fahrt_id, datum, kilometer FROM fahrt WHERE kilometer > (SELECT AVG(kilometer) FROM fahrt);
+#
+##
+##
+#
+22
+#
+SUBSELECT
+#
+Welche Fahrzeuge wurden noch nie gewartet?
+#
+Verwende NOT IN mit einer Unterabfrage auf wartung.
+#
+SELECT kennzeichen, modell FROM fahrzeug WHERE fahrzeug_id NOT IN (SELECT fahrzeug_id FROM wartung);
+#
+##
+##
+#
+23
+#
+SUBSELECT
+#
+Welche Mitarbeitern haben noch keine Dienstfahrt unternommen?
+#
+Prüfe mitarbeiter_id gegen die IDs in fahrt.
+#
+SELECT vorname, nachname FROM mitarbeiter WHERE mitarbeiter_id NOT IN (SELECT mitarbeiter_id FROM fahrt);
+#
+##
+##
+#
+24
+#
+SUBSELECT
+#
+Gib die teuerste Wartung mit Datum, Art und Kosten aus.
+#
+Ermittle MAX(kosten) in einer Unterabfrage.
+#
+SELECT datum, art, kosten FROM wartung WHERE kosten = (SELECT MAX(kosten) FROM wartung);
+#
+##
+##
+#
+25
+#
+SUBSELECT
+#
+Gib alle Mitarbeitern der Abteilung Vertrieb aus, ohne einen JOIN zu verwenden.
+#
+Ermittle die abteilung_id über eine Unterabfrage.
+#
+SELECT vorname, nachname FROM mitarbeiter WHERE abteilung_id = (SELECT abteilung_id FROM abteilung WHERE name = 'Vertrieb');
+#
+##

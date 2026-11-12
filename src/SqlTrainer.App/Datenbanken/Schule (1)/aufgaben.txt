@@ -1,0 +1,325 @@
+##
+#
+1
+#
+SELECT
+#
+Gib alle Schüler aus.
+#
+Verwende SELECT * FROM tabelle.
+#
+SELECT * FROM schueler;
+#
+##
+##
+#
+2
+#
+SELECT
+#
+Gib Vorname und Nachname aller Schüler aus, alphabetisch sortiert nach Nachname.
+#
+ORDER BY sortiert standardmäßig aufsteigend.
+#
+SELECT vorname, nachname FROM schueler ORDER BY nachname;
+#
+##
+##
+#
+3
+#
+SELECT
+#
+Gib alle Noten aus, die schlechter als 4 sind.
+#
+Schlechtere Noten haben einen höheren Zahlenwert.
+#
+SELECT * FROM note WHERE note > 4;
+#
+##
+##
+#
+4
+#
+SELECT
+#
+Gib alle Schüler aus, die im Jahr 2007 geboren sind.
+#
+Das Datum ist Text: Nutze LIKE '2007-%' oder BETWEEN mit zwei Datumsgrenzen.
+#
+SELECT vorname, nachname, geburtsdatum FROM schueler WHERE geburtsdatum LIKE '2007-%';
+#
+##
+##
+#
+5
+#
+SELECT
+#
+Gib alle Klassen aus, deren Bezeichnung mit 'FI' beginnt, zusammen mit ihrem Raum.
+#
+Verwende LIKE 'FI%'.
+#
+SELECT bezeichnung, raum FROM klasse WHERE bezeichnung LIKE 'FI%';
+#
+##
+##
+#
+6
+#
+AGGREGAT
+#
+Wie viele Schüler besuchen die Schule?
+#
+COUNT(*) zählt alle Zeilen.
+#
+SELECT COUNT(*) AS anzahl FROM schueler;
+#
+##
+##
+#
+7
+#
+AGGREGAT
+#
+Wie lautet der Notendurchschnitt über alle vergebenen Noten, gerundet auf zwei Nachkommastellen?
+#
+Kombiniere ROUND() und AVG().
+#
+SELECT ROUND(AVG(note), 2) AS durchschnitt FROM note;
+#
+##
+##
+#
+8
+#
+AGGREGAT
+#
+Wie lautet die beste und die schlechteste vergebene Note im Fach mit der ID 2 (Datenbanken)?
+#
+MIN() liefert hier die beste, MAX() die schlechteste Note.
+#
+SELECT MIN(note) AS beste_note, MAX(note) AS schlechteste_note FROM note WHERE fach_id = 2;
+#
+##
+##
+#
+9
+#
+AGGREGAT
+#
+Wie viele Noten 1 wurden insgesamt vergeben?
+#
+Zähle mit COUNT(*) und filtere mit WHERE.
+#
+SELECT COUNT(*) AS anzahl_einsen FROM note WHERE note = 1;
+#
+##
+##
+#
+10
+#
+AGGREGAT
+#
+Wann wurde die erste Note eingetragen und wann die letzte?
+#
+MIN() und MAX() funktionieren auch für Datumswerte im Format JJJJ-MM-TT.
+#
+SELECT MIN(datum) AS erste_note, MAX(datum) AS letzte_note FROM note;
+#
+##
+##
+#
+11
+#
+JOIN
+#
+Gib alle Schüler mit der Bezeichnung ihrer Klasse aus.
+#
+Verbinde schueler und klasse über klasse_id.
+#
+SELECT s.vorname, s.nachname, k.bezeichnung FROM schueler s INNER JOIN klasse k ON s.klasse_id = k.klasse_id;
+#
+##
+##
+#
+12
+#
+JOIN
+#
+Gib zu jeder Klasse die Bezeichnung und den Nachnamen des Klassenlehrers aus.
+#
+Die Spalte klassenlehrer_id verweist auf lehrer_id.
+#
+SELECT k.bezeichnung, l.nachname AS klassenlehrer FROM klasse k INNER JOIN lehrer l ON k.klassenlehrer_id = l.lehrer_id;
+#
+##
+##
+#
+13
+#
+JOIN
+#
+Gib alle Noten mit Nachname der Schülers, Fachname, Note und Datum aus.
+#
+Verbinde note mit schueler und mit fach.
+#
+SELECT s.nachname, f.name AS fach, n.note, n.datum FROM note n INNER JOIN schueler s ON n.schueler_id = s.schueler_id INNER JOIN fach f ON n.fach_id = f.fach_id;
+#
+##
+##
+#
+14
+#
+JOIN
+#
+Gib alle Fächer mit den IDs der dort vergebenen Noten aus. Fächer ohne Noten sollen ebenfalls erscheinen.
+#
+LEFT JOIN behält alle Fächer.
+#
+SELECT f.name, n.note_id FROM fach f LEFT JOIN note n ON f.fach_id = n.fach_id;
+#
+##
+##
+#
+15
+#
+JOIN
+#
+Gib alle Noten der Klasse FI24A im Fach Datenbanken mit Nachname und Note aus.
+#
+Du brauchst vier Tabellen: note, schueler, klasse und fach.
+#
+SELECT s.nachname, n.note FROM note n INNER JOIN schueler s ON n.schueler_id = s.schueler_id INNER JOIN klasse k ON s.klasse_id = k.klasse_id INNER JOIN fach f ON n.fach_id = f.fach_id WHERE k.bezeichnung = 'FI24A' AND f.name = 'Datenbanken';
+#
+##
+##
+#
+16
+#
+GRUPPIERUNG
+#
+Wie viele Schüler sind in jeder Klasse? Gib die Klassen-ID und die Anzahl aus.
+#
+GROUP BY klasse_id mit COUNT(*).
+#
+SELECT klasse_id, COUNT(*) AS anzahl FROM schueler GROUP BY klasse_id;
+#
+##
+##
+#
+17
+#
+GRUPPIERUNG
+#
+Berechne den Notendurchschnitt je Fach (Fachname und Durchschnitt, gerundet auf zwei Nachkommastellen).
+#
+JOIN zwischen note und fach, danach GROUP BY Fachname.
+#
+SELECT f.name, ROUND(AVG(n.note), 2) AS durchschnitt FROM note n INNER JOIN fach f ON n.fach_id = f.fach_id GROUP BY f.name;
+#
+##
+##
+#
+18
+#
+GRUPPIERUNG
+#
+Wie oft wurde jede Note vergeben? Sortiere aufsteigend nach Note.
+#
+Gruppiere nach der Spalte note.
+#
+SELECT note, COUNT(*) AS haeufigkeit FROM note GROUP BY note ORDER BY note;
+#
+##
+##
+#
+19
+#
+GRUPPIERUNG
+#
+Welche Schüler haben einen Notendurchschnitt besser als 3,0? Gib Nachname und Durchschnitt aus.
+#
+Besser heißt kleiner. Filtere die Gruppen mit HAVING AVG(...) < 3.
+#
+SELECT s.nachname, ROUND(AVG(n.note), 2) AS durchschnitt FROM schueler s INNER JOIN note n ON s.schueler_id = n.schueler_id GROUP BY s.schueler_id, s.nachname HAVING AVG(n.note) < 3;
+#
+##
+##
+#
+20
+#
+GRUPPIERUNG
+#
+Welche Lehrer verantworten mehr als ein Fach? Gib Nachname und Anzahl der Fächer aus.
+#
+JOIN zwischen lehrer und fach, GROUP BY je Lehrer und HAVING COUNT(*) > 1.
+#
+SELECT l.nachname, COUNT(*) AS anzahl_faecher FROM lehrer l INNER JOIN fach f ON l.lehrer_id = f.lehrer_id GROUP BY l.lehrer_id, l.nachname HAVING COUNT(*) > 1;
+#
+##
+##
+#
+21
+#
+SUBSELECT
+#
+Gib alle Noten aus, die schlechter sind als der Durchschnitt aller Noten.
+#
+Berechne AVG(note) in einer Unterabfrage.
+#
+SELECT * FROM note WHERE note > (SELECT AVG(note) FROM note);
+#
+##
+##
+#
+22
+#
+SUBSELECT
+#
+Für welche Schüler liegen noch keine Noten vor?
+#
+Verwende NOT IN mit einer Unterabfrage auf note.
+#
+SELECT vorname, nachname FROM schueler WHERE schueler_id NOT IN (SELECT schueler_id FROM note);
+#
+##
+##
+#
+23
+#
+SUBSELECT
+#
+In welchen Fächern wurde noch keine Note vergeben?
+#
+Prüfe fach_id gegen die Fach-IDs in note.
+#
+SELECT name FROM fach WHERE fach_id NOT IN (SELECT fach_id FROM note);
+#
+##
+##
+#
+24
+#
+SUBSELECT
+#
+Wer ist der jüngste Schüler?
+#
+Die jüngste Person hat das größte Geburtsdatum (MAX).
+#
+SELECT vorname, nachname, geburtsdatum FROM schueler WHERE geburtsdatum = (SELECT MAX(geburtsdatum) FROM schueler);
+#
+##
+##
+#
+25
+#
+SUBSELECT
+#
+Gib alle Schüler der Klasse FI25A aus, ohne einen JOIN zu verwenden.
+#
+Ermittle die klasse_id per Unterabfrage auf klasse.
+#
+SELECT vorname, nachname FROM schueler WHERE klasse_id = (SELECT klasse_id FROM klasse WHERE bezeichnung = 'FI25A');
+#
+##

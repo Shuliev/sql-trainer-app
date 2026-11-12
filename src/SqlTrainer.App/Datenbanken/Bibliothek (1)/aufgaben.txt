@@ -1,0 +1,325 @@
+##
+#
+1
+#
+SELECT
+#
+Gib alle Bücher aus.
+#
+Verwende SELECT * FROM tabelle.
+#
+SELECT * FROM buch;
+#
+##
+##
+#
+2
+#
+SELECT
+#
+Gib Titel und Erscheinungsjahr aller Bücher aus, die nach 1900 erschienen sind. Sortiere aufsteigend nach Jahr.
+#
+Filtere mit WHERE und sortiere mit ORDER BY.
+#
+SELECT titel, erscheinungsjahr FROM buch WHERE erscheinungsjahr > 1900 ORDER BY erscheinungsjahr;
+#
+##
+##
+#
+3
+#
+SELECT
+#
+Gib alle Krimis alphabetisch nach Titel sortiert aus.
+#
+Filtere auf genre = 'Krimi'.
+#
+SELECT titel FROM buch WHERE genre = 'Krimi' ORDER BY titel;
+#
+##
+##
+#
+4
+#
+SELECT
+#
+Gib alle Ausleihen aus, bei denen das Buch noch nicht zurückgegeben wurde.
+#
+Leere Werte prüfst du mit IS NULL, nicht mit = NULL.
+#
+SELECT * FROM ausleihe WHERE rueckgabedatum IS NULL;
+#
+##
+##
+#
+5
+#
+SELECT
+#
+Gib alle Bücher aus, deren Titel mit 'Der' beginnt.
+#
+Verwende LIKE mit dem Platzhalter % am Ende.
+#
+SELECT titel FROM buch WHERE titel LIKE 'Der %';
+#
+##
+##
+#
+6
+#
+AGGREGAT
+#
+Wie viele Bücher besitzt die Bibliothek?
+#
+COUNT(*) zählt alle Zeilen.
+#
+SELECT COUNT(*) AS anzahl_buecher FROM buch;
+#
+##
+##
+#
+7
+#
+AGGREGAT
+#
+Wie viele Seiten hat ein Buch durchschnittlich? Runde auf eine ganze Zahl.
+#
+Kombiniere ROUND() und AVG().
+#
+SELECT ROUND(AVG(seiten)) AS durchschnitt_seiten FROM buch;
+#
+##
+##
+#
+8
+#
+AGGREGAT
+#
+In welchem Jahr erschien das älteste Buch des Bestands?
+#
+Das kleinste Jahr findest du mit MIN().
+#
+SELECT MIN(erscheinungsjahr) AS aeltestes_jahr FROM buch;
+#
+##
+##
+#
+9
+#
+AGGREGAT
+#
+Wie viele Seiten haben alle Krimis zusammen?
+#
+Summiere mit SUM() und filtere mit WHERE.
+#
+SELECT SUM(seiten) AS seiten_gesamt FROM buch WHERE genre = 'Krimi';
+#
+##
+##
+#
+10
+#
+AGGREGAT
+#
+Wie viele Bücher sind derzeit ausgeliehen (noch nicht zurückgegeben)?
+#
+Zähle die Ausleihen mit rueckgabedatum IS NULL.
+#
+SELECT COUNT(*) AS offene_ausleihen FROM ausleihe WHERE rueckgabedatum IS NULL;
+#
+##
+##
+#
+11
+#
+JOIN
+#
+Gib zu jedem Buch den Titel sowie Vor- und Nachname des Autors aus.
+#
+Verbinde buch und autor über autor_id.
+#
+SELECT b.titel, a.vorname, a.nachname FROM buch b INNER JOIN autor a ON b.autor_id = a.autor_id;
+#
+##
+##
+#
+12
+#
+JOIN
+#
+Gib alle Ausleihen mit Ausleihdatum, Buchtitel und Nachname des Mitglieds aus.
+#
+Hier brauchst du zwei JOINs: ausleihe-buch und ausleihe-mitglied.
+#
+SELECT a.ausleihdatum, b.titel, m.nachname FROM ausleihe a INNER JOIN buch b ON a.buch_id = b.buch_id INNER JOIN mitglied m ON a.mitglied_id = m.mitglied_id;
+#
+##
+##
+#
+13
+#
+JOIN
+#
+Gib Titel und Erscheinungsjahr aller Bücher von Autoren aus Deutschland aus.
+#
+Verbinde buch mit autor und filtere auf das Land.
+#
+SELECT b.titel, b.erscheinungsjahr FROM buch b INNER JOIN autor a ON b.autor_id = a.autor_id WHERE a.land = 'Deutschland';
+#
+##
+##
+#
+14
+#
+JOIN
+#
+Gib alle Mitglieder mit den IDs ihrer Ausleihen aus. Mitglieder ohne Ausleihe sollen ebenfalls erscheinen.
+#
+LEFT JOIN behält alle Mitglieder, auch ohne passende Ausleihe.
+#
+SELECT m.vorname, m.nachname, a.ausleihe_id FROM mitglied m LEFT JOIN ausleihe a ON m.mitglied_id = a.mitglied_id;
+#
+##
+##
+#
+15
+#
+JOIN
+#
+Welche Bücher sind aktuell ausgeliehen und bei wem? Gib Titel, Vor- und Nachname des Mitglieds und das Ausleihdatum aus.
+#
+Zwei JOINs plus WHERE rueckgabedatum IS NULL.
+#
+SELECT b.titel, m.vorname, m.nachname, a.ausleihdatum FROM ausleihe a INNER JOIN buch b ON a.buch_id = b.buch_id INNER JOIN mitglied m ON a.mitglied_id = m.mitglied_id WHERE a.rueckgabedatum IS NULL;
+#
+##
+##
+#
+16
+#
+GRUPPIERUNG
+#
+Wie viele Bücher gibt es je Genre?
+#
+GROUP BY genre mit COUNT(*).
+#
+SELECT genre, COUNT(*) AS anzahl FROM buch GROUP BY genre;
+#
+##
+##
+#
+17
+#
+GRUPPIERUNG
+#
+Wie oft hat jedes Mitglied etwas ausgeliehen? Gib die Mitglieds-ID und die Anzahl aus, absteigend sortiert.
+#
+Gruppiere ausleihe nach mitglied_id.
+#
+SELECT mitglied_id, COUNT(*) AS anzahl FROM ausleihe GROUP BY mitglied_id ORDER BY anzahl DESC;
+#
+##
+##
+#
+18
+#
+GRUPPIERUNG
+#
+Wie hoch ist die durchschnittliche Seitenzahl je Genre? Runde auf eine ganze Zahl.
+#
+AVG() funktioniert auch pro Gruppe.
+#
+SELECT genre, ROUND(AVG(seiten)) AS durchschnitt FROM buch GROUP BY genre;
+#
+##
+##
+#
+19
+#
+GRUPPIERUNG
+#
+Gib alle Länder aus, aus denen mindestens zwei Autoren stammen, mit der Anzahl der Autoren.
+#
+Gruppiere autor nach land und filtere mit HAVING.
+#
+SELECT land, COUNT(*) AS anzahl FROM autor GROUP BY land HAVING COUNT(*) >= 2;
+#
+##
+##
+#
+20
+#
+GRUPPIERUNG
+#
+Welche Mitglieder haben mehr als drei Ausleihen? Gib Vorname, Nachname und Anzahl aus.
+#
+JOIN zwischen mitglied und ausleihe, GROUP BY je Mitglied, dann HAVING.
+#
+SELECT m.vorname, m.nachname, COUNT(*) AS anzahl FROM mitglied m INNER JOIN ausleihe a ON m.mitglied_id = a.mitglied_id GROUP BY m.mitglied_id, m.vorname, m.nachname HAVING COUNT(*) > 3;
+#
+##
+##
+#
+21
+#
+SUBSELECT
+#
+Gib alle Bücher aus, die mehr Seiten haben als der Durchschnitt aller Bücher.
+#
+Berechne AVG(seiten) in einer Unterabfrage.
+#
+SELECT titel, seiten FROM buch WHERE seiten > (SELECT AVG(seiten) FROM buch);
+#
+##
+##
+#
+22
+#
+SUBSELECT
+#
+Welche Mitglieder haben noch nie ein Buch ausgeliehen?
+#
+Verwende NOT IN mit einer Unterabfrage auf ausleihe.
+#
+SELECT vorname, nachname FROM mitglied WHERE mitglied_id NOT IN (SELECT mitglied_id FROM ausleihe);
+#
+##
+##
+#
+23
+#
+SUBSELECT
+#
+Welche Bücher wurden noch nie ausgeliehen?
+#
+Die verliehenen Buch-IDs stehen in ausleihe.
+#
+SELECT titel FROM buch WHERE buch_id NOT IN (SELECT buch_id FROM ausleihe);
+#
+##
+##
+#
+24
+#
+SUBSELECT
+#
+Gib das Buch mit den meisten Seiten aus (Titel und Seitenzahl).
+#
+Ermittle MAX(seiten) in einer Unterabfrage.
+#
+SELECT titel, seiten FROM buch WHERE seiten = (SELECT MAX(seiten) FROM buch);
+#
+##
+##
+#
+25
+#
+SUBSELECT
+#
+Gib alle Bücher von Autoren aus England aus, ohne einen JOIN zu verwenden.
+#
+Liefert die Unterabfrage mehrere Werte, brauchst du IN statt =.
+#
+SELECT titel FROM buch WHERE autor_id IN (SELECT autor_id FROM autor WHERE land = 'England');
+#
+##
