@@ -1,0 +1,49 @@
+@namespace SqlTrainer.UI.Components.Guide
+
+@* Eine Stolperfalle in datenbank.sql: kurze Erklärung plus „So nicht“ / „So richtig“ nebeneinander. *@
+<MudPaper Outlined="true" Class="pa-4 mb-4">
+    <div class="d-flex align-center gap-3 mb-2">
+        <MudAvatar Color="Color.Warning" Size="Size.Small">@Number</MudAvatar>
+        <MudText Typo="Typo.subtitle1"><b>@Title</b></MudText>
+    </div>
+    <MudText Typo="Typo.body2" Class="mb-3">@ChildContent</MudText>
+    <MudGrid Spacing="2">
+        <MudItem xs="12" md="6">
+            <div class="pitfall-code pitfall-wrong">
+                <div class="pitfall-label">
+                    <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" /> @WrongLabel
+                </div>
+                <pre>@Wrong</pre>
+            </div>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <div class="pitfall-code pitfall-right">
+                <div class="pitfall-label">
+                    <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" /> So richtig
+                </div>
+                <pre>@Right</pre>
+            </div>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public int Number { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>Why this goes wrong and what to do instead.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Wrong { get; set; } = string.Empty;
+
+    [Parameter]
+    public string WrongLabel { get; set; } = "So nicht";
+
+    [Parameter, EditorRequired]
+    public string Right { get; set; } = string.Empty;
+}
