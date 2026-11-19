@@ -1,0 +1,40 @@
+.pitfall-code {
+    height: 100%;
+    border-radius: 4px;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-left-width: 4px;
+    overflow-x: auto;
+}
+
+.pitfall-wrong {
+    border-left-color: var(--mud-palette-error);
+}
+
+.pitfall-right {
+    border-left-color: var(--mud-palette-success);
+}
+
+.pitfall-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pitfall-wrong .pitfall-label {
+    color: var(--mud-palette-error);
+}
+
+.pitfall-right .pitfall-label {
+    color: var(--mud-palette-success);
+}
+
+pre {
+    margin: 0;
+    padding: 4px 12px 10px;
+    font-size: 0.8125rem;
+}

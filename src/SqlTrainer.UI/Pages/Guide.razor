@@ -1,4 +1,5 @@
 @page "/guide"
+@using SqlTrainer.UI.Components.Guide
 
 <PageTitle>Anleitung - SQL-Trainer</PageTitle>
 
@@ -53,9 +54,9 @@
 </MudGrid>
 
 <MudAlert Severity="Severity.Normal" ContentAlignment="HorizontalAlignment.Start">
-    Die Dateien dürfen direkt im ZIP liegen oder in genau einem Unterordner (z.&nbsp;B. wenn du unter Windows
-    einen Ordner über „Senden an → ZIP-komprimierter Ordner“ packst). Groß- und Kleinschreibung der Dateinamen
-    spielt keine Rolle. Die ZIP-Datei darf höchstens @MaxMegabytes MB groß sein.
+    Die Dateien dürfen direkt im ZIP liegen oder in genau einem Unterordner (so entsteht es, wenn du unter Windows
+    einen Ordner per Rechtsklick packst, siehe <a href="guide#windows">Schritt für Schritt unter Windows</a>).
+    Groß- und Kleinschreibung der Dateinamen spielt keine Rolle. Die ZIP-Datei darf höchstens @MaxMegabytes MB groß sein.
 </MudAlert>
 
 <br />
@@ -87,31 +88,110 @@
 <br />
 <MudText Typo="Typo.h6" GutterBottom="true">datenbank.sql</MudText>
 <MudText Typo="Typo.body2" GutterBottom="true">
-    Das Skript wird mit <b>SQLite</b> ausgeführt und muss deshalb SQLite-kompatibel sein.<br />
-    Es legt zuerst alle Tabellen an und fügt danach die Beispieldaten ein.<br />
-    Am Anfang sollten die Tabellen mit <code>DROP TABLE IF EXISTS</code> gelöscht werden, damit das Skript mehrfach ausgeführt werden kann.<br />
-    Tabellen mit Fremdschlüsseln werden dabei zuerst gelöscht und zuletzt angelegt.
+    Das Skript wird mit <b>SQLite</b> ausgeführt und baut die komplette Datenbank auf. Es besteht immer aus vier Teilen,
+    in genau dieser Reihenfolge:
 </MudText>
 <MudPaper Class="pa-4 my-4" Outlined="true">
     <pre>@SqlExample</pre>
 </MudPaper>
-<MudText Typo="Typo.body2" GutterBottom="true">
-    Typische Unterschiede zu anderen Datenbanksystemen:
+
+<MudText Typo="Typo.subtitle1" Class="mt-6 mb-1"><b>Stolperfallen</b></MudText>
+<MudText Typo="Typo.body2" Class="mb-4">
+    Diese Punkte macht man leicht falsch, besonders wenn man SQL von MySQL, MariaDB oder Access kennt.
+    Ein Fehler hier bedeutet, dass das Paket beim Hochladen abgelehnt wird oder die Musterlösungen falsche Ergebnisse liefern.
 </MudText>
-<MudList T="string" Dense="true">
-    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
-        Datumswerte als Text im Format <code>JJJJ-MM-TT</code> speichern (z.&nbsp;B. <code>'2025-11-19'</code>), Uhrzeiten als <code>HH:MM</code>.
-    </MudListItem>
-    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
-        Datentypen <code>INTEGER</code>, <code>REAL</code> und <code>TEXT</code> verwenden; <code>INTEGER PRIMARY KEY</code> statt <code>AUTO_INCREMENT</code>.
-    </MudListItem>
-    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
-        Keine Befehle wie <code>CREATE DATABASE</code> oder <code>USE</code>, die Datenbank legt der SQL-Trainer selbst an.
-    </MudListItem>
-    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
-        Mit <code>PRAGMA foreign_keys = ON;</code> werden Fremdschlüssel geprüft.
-    </MudListItem>
-</MudList>
+
+<SqlPitfall Number="1" Title="PRAGMA foreign_keys = ON; gehört in die erste Zeile"
+            WrongLabel="So nicht (Zeile fehlt)" Wrong="@PitfallPragmaWrong" Right="@PitfallPragmaRight">
+    SQLite prüft Fremdschlüssel <b>standardmäßig nicht</b>, anders als die meisten anderen Datenbanksysteme.
+    Ohne diese Zeile kannst du z.&nbsp;B. einen Schüler in Klasse 99 einfügen, obwohl es Klasse 99 gar nicht gibt,
+    und niemand bemerkt den Fehler. Später liefern JOIN-Aufgaben dann unerwartete Ergebnisse.
+    Die Zeile muss ganz oben stehen, vor allen anderen Befehlen.
+</SqlPitfall>
+
+<SqlPitfall Number="2" Title="DROP TABLE IF EXISTS – und zwar rückwärts" Wrong="@PitfallDropWrong" Right="@PitfallDropRight">
+    Mit <code>DROP TABLE IF EXISTS</code> am Anfang kannst du das Skript beim Testen beliebig oft ausführen:
+    Ohne <code>DROP</code> scheitert der zweite Lauf („table already exists“), ohne <code>IF EXISTS</code> der erste
+    („no such table“). Weil die Fremdschlüssel aktiv sind, müssen Tabellen, die auf andere <b>verweisen</b>, zuerst gelöscht
+    werden. Lösche also in der <b>umgekehrten</b> Reihenfolge, in der du die Tabellen anlegst.
+</SqlPitfall>
+
+<SqlPitfall Number="3" Title="Erst die Daten, auf die verwiesen wird" Wrong="@PitfallInsertOrderWrong" Right="@PitfallInsertOrderRight">
+    Ein Datensatz mit Fremdschlüssel darf erst eingefügt werden, wenn der Datensatz existiert, auf den er verweist.
+    Füge also zuerst die Klassen ein, dann die Schüler. Sonst bricht das Skript mit „FOREIGN KEY constraint failed“ ab.
+</SqlPitfall>
+
+<SqlPitfall Number="4" Title="Kommazahlen mit Punkt, nicht mit Komma" Wrong="@PitfallDecimalWrong" Right="@PitfallDecimalRight">
+    In SQL trennt das Komma die einzelnen Werte. Aus <code>12,50</code> werden deshalb <b>zwei</b> Werte (12 und 50).
+    Im besten Fall bricht das Skript ab, im schlimmsten Fall landen die Zahlen in der falschen Spalte.
+</SqlPitfall>
+
+<SqlPitfall Number="5" Title="Datum als Text im Format JJJJ-MM-TT" Wrong="@PitfallDateWrong" Right="@PitfallDateRight">
+    SQLite hat keinen eigenen Datumstyp. Nur im Format <code>JJJJ-MM-TT</code> sortieren <code>ORDER BY</code>,
+    <code>&lt;</code>, <code>&gt;</code> und <code>BETWEEN</code> richtig und funktionieren Datumsfunktionen wie
+    <code>strftime</code>. Im deutschen Format würde <code>'01.12.2024'</code> vor <code>'19.11.2024'</code> einsortiert.
+    Uhrzeiten werden als <code>HH:MM</code> gespeichert.
+</SqlPitfall>
+
+<SqlPitfall Number="6" Title="Text in einfache Anführungszeichen" Wrong="@PitfallQuotesWrong" Right="@PitfallQuotesRight">
+    Texte stehen in SQL in <b>einfachen</b> Anführungszeichen. Doppelte Anführungszeichen bedeuten einen Spaltennamen.
+    Enthält ein Text selbst ein Apostroph, schreibst du es doppelt: <code>'O''Brien'</code>.
+</SqlPitfall>
+
+<SqlPitfall Number="7" Title="Kein CREATE DATABASE und kein USE" Wrong="@PitfallCreateDbWrong" Right="@PitfallCreateDbRight">
+    Die Datenbank selbst legt der SQL-Trainer an. Das Skript beginnt direkt mit dem Löschen und Anlegen der Tabellen.
+</SqlPitfall>
+
+<MudText Typo="Typo.subtitle1" Class="mt-6 mb-1"><b>Datentypen</b></MudText>
+<MudText Typo="Typo.body2" Class="mb-2">
+    SQLite kennt im Wesentlichen nur drei Datentypen. So übersetzt du die gewohnten Typen:
+</MudText>
+<MudSimpleTable Dense="true" Outlined="true" Class="mb-4">
+    <thead>
+        <tr>
+            <th>Gewohnt aus MySQL, Access …</th>
+            <th>In SQLite</th>
+            <th>Hinweis</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>INT AUTO_INCREMENT PRIMARY KEY</code></td>
+            <td><code>INTEGER PRIMARY KEY</code></td>
+            <td>Zählt automatisch hoch. Genau so schreiben, nicht <code>INT</code>.</td>
+        </tr>
+        <tr>
+            <td><code>INT</code>, <code>SMALLINT</code>, <code>BIGINT</code></td>
+            <td><code>INTEGER</code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td><code>DECIMAL(8,2)</code>, <code>FLOAT</code>, <code>DOUBLE</code></td>
+            <td><code>REAL</code></td>
+            <td>Werte mit Punkt schreiben: <code>12.50</code></td>
+        </tr>
+        <tr>
+            <td><code>VARCHAR(50)</code>, <code>CHAR(10)</code></td>
+            <td><code>TEXT</code></td>
+            <td>Die Länge wird von SQLite nicht geprüft.</td>
+        </tr>
+        <tr>
+            <td><code>DATE</code>, <code>DATETIME</code>, <code>TIME</code></td>
+            <td><code>TEXT</code></td>
+            <td><code>'2025-11-19'</code>, <code>'2025-11-19 14:30'</code>, <code>'14:30'</code></td>
+        </tr>
+        <tr>
+            <td><code>BOOLEAN</code></td>
+            <td><code>INTEGER</code></td>
+            <td><code>1</code> für ja, <code>0</code> für nein</td>
+        </tr>
+        <tr>
+            <td><code>ENUM('bar', 'karte')</code></td>
+            <td><code>TEXT CHECK (zahlart IN ('bar', 'karte'))</code></td>
+            <td></td>
+        </tr>
+    </tbody>
+</MudSimpleTable>
 
 <br />
 <MudText Typo="Typo.h6" GutterBottom="true">aufgaben.txt</MudText>
@@ -163,41 +243,104 @@
 </MudAlert>
 
 <br />
-<MudText Typo="Typo.h5" GutterBottom="true">Datenbank hochladen</MudText>
-<br />
-<MudText Typo="Typo.body2" GutterBottom="true">
-    1. Lege die vier Dateien in einen Ordner und benenne ihn so, wie die Datenbank heißen soll (z.&nbsp;B. <code>Schule</code>).<br />
-    2. Packe den Ordner oder die vier Dateien in eine ZIP-Datei (z.&nbsp;B. <code>Schule.zip</code>).<br />
-    3. Öffne die Seite
-    <MudLink Href="datenbanken-verwalten" Typo="Typo.body2" Color="Color.Primary"><b>Datenbanken verwalten</b></MudLink>
-    und klicke auf „Datenbank hochladen“.<br />
-    4. Wähle die ZIP-Datei aus. Gibt es schon eine Datenbank mit dem gleichen Namen, wirst du gefragt, ob sie ersetzt werden soll.
+<MudText Typo="Typo.h5" GutterBottom="true" id="windows">Schritt für Schritt unter Windows</MudText>
+<MudText Typo="Typo.body2" Class="mb-6">
+    Die Bilder zeigen Windows 11 (24H2). Bei älteren Versionen heißen manche Menüpunkte etwas anders, das ist jeweils dabei angegeben.
 </MudText>
 
-<br />
-<MudCard Class="mb-4">
+<div class="guide-step">
+    <MudAvatar Color="Color.Primary" Size="Size.Small">1</MudAvatar>
+    <div class="guide-step-content">
+        <MudText Typo="Typo.subtitle1"><b>Dateiendungen sichtbar machen</b></MudText>
+        <MudText Typo="Typo.body2">
+            Windows blendet Endungen wie <code>.txt</code> normalerweise aus. Dann entsteht schnell eine Datei
+            <code>beschreibung.txt.txt</code> oder <code>datenbank.sql.txt</code>, die der SQL-Trainer nicht findet.
+            Öffne den Ordner im <b>Explorer</b>, klicke oben in der Leiste auf <b>Anzeigen</b> → <b>Einblenden</b> und
+            setze den Haken bei <b>Dateinamenerweiterungen</b>.
+        </MudText>
+        <figure class="guide-shot">
+            <img src="_content/SqlTrainer.UI/guide/dateiendungen.png" alt="Explorer-Menü Anzeigen, Untermenü Einblenden, Eintrag Dateinamenerweiterungen mit Haken" />
+            <figcaption>Explorer: Anzeigen → Einblenden → Dateinamenerweiterungen. (Windows 10: Reiter „Ansicht“ → Haken bei „Dateinamenerweiterungen“)</figcaption>
+        </figure>
+    </div>
+</div>
+
+<div class="guide-step">
+    <MudAvatar Color="Color.Primary" Size="Size.Small">2</MudAvatar>
+    <div class="guide-step-content">
+        <MudText Typo="Typo.subtitle1"><b>Textdateien im Editor als UTF-8 speichern</b></MudText>
+        <MudText Typo="Typo.body2">
+            Schreibe <code>beschreibung.txt</code>, <code>datenbank.sql</code> und <code>aufgaben.txt</code> mit dem
+            Windows-<b>Editor</b> (Notepad) oder einem Code-Editor, nicht mit Word. Wähle beim Speichern
+            <b>Datei</b> → <b>Speichern unter</b> und achte unten im Fenster auf die <b>Codierung UTF-8</b>.
+            Bei <code>datenbank.sql</code> stellst du außerdem den Dateityp auf <b>Alle Dateien (*.*)</b>,
+            sonst hängt der Editor ein <code>.txt</code> an.
+        </MudText>
+        <figure class="guide-shot">
+            <img src="_content/SqlTrainer.UI/guide/speichern-utf8.png" alt="Unterer Teil des Fensters Speichern unter: Dateityp Alle Dateien, Codierung UTF-8" />
+            <figcaption>Editor: Datei → Speichern unter. Unten rechts die Codierung, bei .sql-Dateien zusätzlich der Dateityp.</figcaption>
+        </figure>
+    </div>
+</div>
+
+<div class="guide-step">
+    <MudAvatar Color="Color.Primary" Size="Size.Small">3</MudAvatar>
+    <div class="guide-step-content">
+        <MudText Typo="Typo.subtitle1"><b>SQL-Skript und Musterlösungen testen</b></MudText>
+        <MudText Typo="Typo.body2">
+            Installiere den kostenlosen
+            <MudLink Href="https://sqlitebrowser.org" Target="_blank" Typo="Typo.body2" Color="Color.Primary"><b>DB Browser for SQLite</b></MudLink>.
+            Dort legst du mit <b>Neue Datenbank</b> eine Testdatei an (das Fenster zum Anlegen einer Tabelle einfach schließen),
+            wechselst in den Reiter <b>SQL ausführen</b>, fügst den Inhalt von <code>datenbank.sql</code> ein und startest mit
+            <kbd>F5</kbd>. Danach probierst du dort jede Musterlösung aus.
+            So findest du Fehler, bevor du die Datenbank hochlädst.
+        </MudText>
+    </div>
+</div>
+
+<div class="guide-step">
+    <MudAvatar Color="Color.Primary" Size="Size.Small">4</MudAvatar>
+    <div class="guide-step-content">
+        <MudText Typo="Typo.subtitle1"><b>ZIP-Datei erstellen</b></MudText>
+        <MudText Typo="Typo.body2">
+            Lege die vier Dateien in einen Ordner und benenne ihn so, wie die Datenbank heißen soll (z.&nbsp;B. <code>Schule</code>).
+            Mache einen <b>Rechtsklick</b> auf den Ordner und wähle <b>Komprimieren in…</b> → <b>ZIP-Datei</b>.
+            Daneben entsteht <code>Schule.zip</code>.
+        </MudText>
+        <figure class="guide-shot">
+            <img src="_content/SqlTrainer.UI/guide/zip-erstellen.png" alt="Kontextmenü des Ordners Schule mit Komprimieren in und Untermenü ZIP-Datei" />
+            <figcaption>Rechtsklick auf den Ordner → Komprimieren in → ZIP-Datei. (Ältere Windows-11-Versionen: „In ZIP-Datei komprimieren“; Windows 10: „Senden an“ → „ZIP-komprimierter Ordner“)</figcaption>
+        </figure>
+    </div>
+</div>
+
+<div class="guide-step">
+    <MudAvatar Color="Color.Primary" Size="Size.Small">5</MudAvatar>
+    <div class="guide-step-content">
+        <MudText Typo="Typo.subtitle1"><b>Hochladen</b></MudText>
+        <MudText Typo="Typo.body2">
+            Öffne die Seite
+            <MudLink Href="datenbanken-verwalten" Typo="Typo.body2" Color="Color.Primary"><b>Datenbanken verwalten</b></MudLink>,
+            klicke auf „Datenbank hochladen“ und wähle die ZIP-Datei aus. Gibt es schon eine Datenbank mit dem gleichen Namen,
+            wirst du gefragt, ob sie ersetzt werden soll.
+        </MudText>
+        <figure class="guide-shot">
+            <img src="_content/SqlTrainer.UI/guide/hochladen.png" alt="Seite Datenbanken verwalten mit markiertem Button Datenbank hochladen" />
+            <figcaption>Menü links: Datenbanken verwalten → Datenbank hochladen.</figcaption>
+        </figure>
+    </div>
+</div>
+
+<MudCard Class="mb-4 mt-6">
     <MudCardContent>
         <MudText Typo="Typo.h6" GutterBottom="true">Checkliste vor dem Hochladen</MudText>
         <MudText Typo="Typo.body2">
-            ✔ Alle vier Dateien sind vorhanden und genau so benannt wie oben.<br />
+            ✔ Alle vier Dateien sind vorhanden und genau so benannt wie oben (kein <code>.txt.txt</code>).<br />
             ✔ Alle Textdateien sind in UTF-8 gespeichert.<br />
-            ✔ <code>datenbank.sql</code> läuft in SQLite ohne Fehler durch.<br />
+            ✔ <code>datenbank.sql</code> beginnt mit <code>PRAGMA foreign_keys = ON;</code> und läuft in SQLite ohne Fehler durch, auch zweimal hintereinander.<br />
             ✔ <code>aufgaben.txt</code> enthält 25 Aufgaben, je 5 pro Themenbereich.<br />
             ✔ Jede Musterlösung liefert gegen die Beispieldaten ein sinnvolles Ergebnis.<br />
             ✔ Das ER-Diagramm passt zu den Tabellen in <code>datenbank.sql</code>.
-        </MudText>
-    </MudCardContent>
-</MudCard>
-
-<MudCard Class="mb-4">
-    <MudCardContent>
-        <MudText Typo="Typo.h6" GutterBottom="true">Tipp</MudText>
-        <MudText Typo="Typo.body2">
-            Teste deine Musterlösungen vorher mit einem SQLite-Werkzeug wie dem
-            <MudLink Href="https://sqlitebrowser.org" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
-                <b>DB Browser for SQLite</b>
-            </MudLink>.
-            So findest du Fehler, bevor du die Datenbank hochlädst.
         </MudText>
     </MudCardContent>
 </MudCard>
@@ -230,11 +373,14 @@
 
     private const string SqlExample =
         """
+        -- 1. Fremdschlüssel-Prüfung einschalten (siehe Stolperfalle 1)
         PRAGMA foreign_keys = ON;
 
+        -- 2. Alte Tabellen löschen: abhängige Tabellen zuerst (siehe Stolperfalle 2)
         DROP TABLE IF EXISTS schueler;
         DROP TABLE IF EXISTS klasse;
 
+        -- 3. Tabellen anlegen: Tabellen ohne Fremdschlüssel zuerst
         CREATE TABLE klasse (
           klasse_id INTEGER PRIMARY KEY,
           bezeichnung TEXT NOT NULL UNIQUE,
@@ -250,6 +396,7 @@
           FOREIGN KEY (klasse_id) REFERENCES klasse(klasse_id)
         );
 
+        -- 4. Beispieldaten einfügen, in derselben Reihenfolge wie beim Anlegen
         INSERT INTO klasse VALUES
         (1, 'FI24A', 'A101'),
         (2, 'FI24B', 'A102');
@@ -257,6 +404,104 @@
         INSERT INTO schueler VALUES
         (1, 'Leon', 'Arslan', '2008-04-19', 1),
         (2, 'Marie', 'Becker', '2007-09-05', 2);
+        """;
+
+    private const string PitfallPragmaWrong =
+        """
+        DROP TABLE IF EXISTS schueler;
+        DROP TABLE IF EXISTS klasse;
+        ...
+        """;
+
+    private const string PitfallPragmaRight =
+        """
+        PRAGMA foreign_keys = ON;
+
+        DROP TABLE IF EXISTS schueler;
+        DROP TABLE IF EXISTS klasse;
+        ...
+        """;
+
+    private const string PitfallDropWrong =
+        """
+        DROP TABLE klasse;
+        DROP TABLE schueler;
+        """;
+
+    private const string PitfallDropRight =
+        """
+        DROP TABLE IF EXISTS schueler; -- verweist auf klasse
+        DROP TABLE IF EXISTS klasse;
+        """;
+
+    private const string PitfallInsertOrderWrong =
+        """
+        INSERT INTO schueler VALUES
+        (1, 'Leon', 'Arslan', '2008-04-19', 1);
+
+        INSERT INTO klasse VALUES
+        (1, 'FI24A', 'A101');
+        """;
+
+    private const string PitfallInsertOrderRight =
+        """
+        INSERT INTO klasse VALUES
+        (1, 'FI24A', 'A101');
+
+        INSERT INTO schueler VALUES
+        (1, 'Leon', 'Arslan', '2008-04-19', 1);
+        """;
+
+    private const string PitfallDecimalWrong =
+        """
+        INSERT INTO artikel VALUES
+        (1, 'Kugelschreiber', 1,99);
+        """;
+
+    private const string PitfallDecimalRight =
+        """
+        INSERT INTO artikel VALUES
+        (1, 'Kugelschreiber', 1.99);
+        """;
+
+    private const string PitfallDateWrong =
+        """
+        (1, 'Leon', 'Arslan', '19.04.2008', 1),
+        (2, 'Marie', 'Becker', '5.9.2007', 2);
+        """;
+
+    private const string PitfallDateRight =
+        """
+        (1, 'Leon', 'Arslan', '2008-04-19', 1),
+        (2, 'Marie', 'Becker', '2007-09-05', 2);
+        """;
+
+    private const string PitfallQuotesWrong =
+        """
+        INSERT INTO lehrer VALUES
+        (1, "Sean", "O'Brien", "OBR");
+        """;
+
+    private const string PitfallQuotesRight =
+        """
+        INSERT INTO lehrer VALUES
+        (1, 'Sean', 'O''Brien', 'OBR');
+        """;
+
+    private const string PitfallCreateDbWrong =
+        """
+        CREATE DATABASE schule;
+        USE schule;
+
+        CREATE TABLE klasse (...);
+        """;
+
+    private const string PitfallCreateDbRight =
+        """
+        PRAGMA foreign_keys = ON;
+
+        DROP TABLE IF EXISTS klasse;
+        CREATE TABLE klasse (...);
         """;
 
     private const string TaskExample =
