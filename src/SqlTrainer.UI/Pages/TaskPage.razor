@@ -1,0 +1,193 @@
+@page "/Task"
+
+<PageTitle>@TaskTitle - @DatabaseName</PageTitle>
+
+@* Header *@
+<div class="d-flex justify-space-between align-start mb-6">
+    <div>
+        <MudText Typo="Typo.overline" Color="Color.Primary" Style="font-weight:700; letter-spacing:.1em;">
+            @DatabaseName · @Category · Aufgabe @TaskNumber von @TaskCount
+        </MudText>
+        <MudText Typo="Typo.h4" Style="font-weight:700;">@TaskTitle</MudText>
+    </div>
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">
+        Aufgabenübersicht
+    </MudButton>
+</div>
+
+@* Main three-column panel *@
+<MudPaper Outlined="true" Class="overflow-hidden">
+    <div class="d-flex flex-wrap" style="min-height:600px;">
+
+        @* Left: table structure *@
+        <div class="pa-4" style="flex:0 0 220px; border-right:1px solid var(--mud-palette-divider);">
+            <MudText Typo="Typo.subtitle1" Style="font-weight:700;" Class="mb-3">Tabellenstruktur</MudText>
+            @foreach (var table in Tables)
+            {
+                <div class="mb-3">
+                    <MudLink Color="Color.Primary" Typo="Typo.body2" Style="font-weight:600; cursor:pointer;"
+                             OnClick="@(() => table.Expanded = !table.Expanded)">
+                        <MudIcon Icon="@(table.Expanded ? Icons.Material.Filled.ArrowDropDown : Icons.Material.Filled.ArrowRight)"
+                                 Size="Size.Small" Style="vertical-align:middle;" />
+                        @table.Name
+                    </MudLink>
+                    @if (table.Expanded)
+                    {
+                        <div class="ml-3 mt-2 pl-4" style="border-left:1px solid var(--mud-palette-divider);">
+                            @foreach (var col in table.Columns)
+                            {
+                                <div class="mb-2">
+                                    <MudText Typo="Typo.body2" Style="font-family:monospace;">@col.Name</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@col.Type@(col.Key is null ? "" : $" · {col.Key}")</MudText>
+                                </div>
+                            }
+                        </div>
+                    }
+                    <MudDivider Class="mt-3" />
+                </div>
+            }
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" EndIcon="@Icons.Material.Filled.ArrowForward">
+                Datenmodell ansehen
+            </MudButton>
+        </div>
+
+        @* Middle: task, editor, result *@
+        <div class="d-flex flex-column" style="flex:1 1 400px; min-width:0;">
+            <div class="pa-4">
+                <MudText Typo="Typo.overline" Color="Color.Primary" Style="font-weight:700; letter-spacing:.1em;">Deine Aufgabe</MudText>
+                <MudText Typo="Typo.body1">@TaskDescription</MudText>
+            </div>
+            <MudDivider />
+
+            <div class="pa-4">
+                <div class="d-flex justify-space-between align-center mb-3">
+                    <MudText Typo="Typo.subtitle2" Style="font-weight:700;">SQL-Editor</MudText>
+                    <div class="d-flex gap-2">
+                        <MudButton Variant="Variant.Text" OnClick="@(() => SqlQuery = string.Empty)">Leeren</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CheckQuery">Abfrage überprüfen</MudButton>
+                    </div>
+                </div>
+                <textarea @bind="SqlQuery" @bind:event="oninput" spellcheck="false"
+                          placeholder="Schreibe hier deine SQL-Abfrage …"
+                          style="width:100%; height:280px; resize:vertical; padding:20px; border:none; border-radius:8px; outline:none;
+                                 background:#1f2230; color:#e6e6f0; font-family:monospace; font-size:15px;"></textarea>
+                <div class="d-flex gap-2 mt-2">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" OnClick="@(() => ShowHint = !ShowHint)">Tipp anzeigen</MudButton>
+                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => ShowSolution = !ShowSolution)">Musterlösung anzeigen</MudButton>
+                </div>
+                @if (ShowHint)
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">@Hint</MudAlert>
+                }
+                @if (ShowSolution)
+                {
+                    <MudAlert Severity="Severity.Normal" Dense="true" Class="mt-2"><code>@Solution</code></MudAlert>
+                }
+            </div>
+            <MudDivider />
+
+            <div class="pa-4 flex-grow-1">
+                <div class="d-flex justify-space-between align-center mb-3">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight:700;">Ergebnis &amp; Rückmeldung</MudText>
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">Demo-Prüfung</MudChip>
+                </div>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @(ResultMessage ?? "Dein Ergebnis erscheint hier, sobald du die Abfrage überprüfst.")
+                </MudText>
+            </div>
+        </div>
+
+        @* Right: sample data *@
+        <div class="pa-4" style="flex:0 0 310px; border-left:1px solid var(--mud-palette-divider);">
+            <MudText Typo="Typo.subtitle1" Style="font-weight:700;" Class="mb-3">Verfügbare Beispieldaten</MudText>
+            @foreach (var table in Tables)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Primary" Style="font-weight:600;" Class="mt-4 mb-2">@table.Name</MudText>
+                <MudPaper Outlined="true">
+                    <MudSimpleTable Dense="true" Elevation="0" Style="font-size:12px;">
+                        <thead>
+                            <tr>
+                                @foreach (var col in table.Columns)
+                                {
+                                    <th>@col.Name</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in table.SampleRows)
+                            {
+                                <tr>
+                                    @foreach (var cell in row)
+                                    {
+                                        <td>@cell</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </MudSimpleTable>
+                </MudPaper>
+            }
+        </div>
+    </div>
+</MudPaper>
+
+@* Bottom navigation *@
+<div class="d-flex justify-space-between align-center mt-4">
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">Zur Aufgabenliste</MudButton>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">@TaskNumber / @TaskCount Aufgaben</MudText>
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward">Nächste Aufgabe</MudButton>
+</div>
+
+@code {
+    // Placeholder data – to be replaced by a ViewModel / database connection later.
+    public string DatabaseName { get; set; } = "Bibliothek";
+    private string Category => "SELECT";
+    private int TaskNumber => 1;
+    private int TaskCount => 5;
+    private string TaskTitle => "Alle Datensätze anzeigen";
+    private string TaskDescription => "Zeige alle Datensätze aus autoren.";
+    private string Hint => "Mit * wählst du alle Spalten einer Tabelle aus.";
+    private string Solution => "SELECT * FROM autoren;";
+
+    private string SqlQuery { get; set; } = string.Empty;
+    private string? ResultMessage { get; set; }
+    private bool ShowHint { get; set; }
+    private bool ShowSolution { get; set; }
+
+    private void CheckQuery() =>
+        ResultMessage = string.IsNullOrWhiteSpace(SqlQuery)
+            ? "Bitte gib zuerst eine SQL-Abfrage ein."
+            : "Die Prüfung ist noch nicht angebunden.";
+
+    private readonly List<TableInfo> Tables =
+    [
+        new("autoren",
+            [new("autor_id", "INTEGER", "PK"), new("name", "VARCHAR(100)"), new("land", "VARCHAR(100)")],
+            [
+                ["1", "Cornelia Funke", "Deutschland"],
+                ["2", "Jules Verne", "Frankreich"],
+                ["3", "Erich Kästner", "Deutschland"],
+                ["4", "Astrid Lindgren", "Schweden"],
+                ["5", "Michael Ende", "Deutschland"],
+            ]),
+        new("buecher",
+            [new("buch_id", "INTEGER", "PK"), new("autor_id", "INTEGER", "FK"), new("preis", "DECIMAL(10,2)")],
+            [
+                ["1", "1", "18"],
+                ["2", "1", "14"],
+                ["3", "1", "12"],
+                ["4", "2", "16"],
+                ["5", "3", "20"],
+            ]),
+    ];
+
+    private record ColumnInfo(string Name, string Type, string? Key = null);
+
+    private class TableInfo(string name, List<ColumnInfo> columns, List<string[]> sampleRows)
+    {
+        public string Name { get; } = name;
+        public List<ColumnInfo> Columns { get; } = columns;
+        public List<string[]> SampleRows { get; } = sampleRows;
+        public bool Expanded { get; set; } = true;
+    }
+}
