@@ -1,3 +1,15 @@
+/* Nichts darf breiter als das Fenster werden: lange Zeilen umbrechen statt seitlich zu scrollen. */
+pre {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+code,
+td {
+    overflow-wrap: anywhere;
+}
+
 .guide-step {
     display: flex;
     gap: 16px;

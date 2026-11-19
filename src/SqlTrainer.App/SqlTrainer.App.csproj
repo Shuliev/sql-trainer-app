@@ -42,10 +42,16 @@
   -->
   <Target Name="EmbedStaticWebAssetsAsResources" BeforeTargets="_GenerateCompileInputs" DependsOnTargets="ResolveBuildStaticWebAssets">
     <ItemGroup>
-      <_EmbeddableStaticWebAsset Include="@(StaticWebAsset)" Condition="!$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.gz'))&#xD;&#xA;                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.br'))&#xD;&#xA;                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').Contains('.bundle.scp.css'))" />
+      <_EmbeddableStaticWebAsset Include="@(StaticWebAsset)" Condition="!$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.gz'))&#xD;&#xA;                   and !$([System.String]::Copy('%(StaticWebAsset.RelativePath)').EndsWith('.br'))" />
       <_EmbeddableStaticWebAsset>
-        <!-- Strip the "#[.{fingerprint}]?"/"!" placeholder markers used by the fingerprinting system. -->
-        <_PlainRelativePath>$([System.Text.RegularExpressions.Regex]::Replace('%(_EmbeddableStaticWebAsset.RelativePath)', '#\[\.\{fingerprint(=[^}]*)?\}\][?!]', ''))</_PlainRelativePath>
+        <!-- Resolve the fingerprint placeholders: "#[.{fingerprint}]?" (optional) is dropped, so e.g. the app's
+             styles.css is served without a hash. "#[.{fingerprint}]!" (required) is replaced by the real hash:
+             the scoped-CSS bundles of class libraries (e.g. SqlTrainer.UI.bundle.scp.css) are only requested
+             under that name, via the @import at the top of SqlTrainer.App.styles.css. -->
+        <_PlainRelativePath>$([System.Text.RegularExpressions.Regex]::Replace('%(_EmbeddableStaticWebAsset.RelativePath)', '#\[\.\{fingerprint(=[^}]*)?\}\]\?', ''))</_PlainRelativePath>
+      </_EmbeddableStaticWebAsset>
+      <_EmbeddableStaticWebAsset>
+        <_PlainRelativePath>$([System.Text.RegularExpressions.Regex]::Replace('%(_EmbeddableStaticWebAsset._PlainRelativePath)', '#\[\.\{fingerprint(=[^}]*)?\}\]!', '.%(_EmbeddableStaticWebAsset.Fingerprint)'))</_PlainRelativePath>
       </_EmbeddableStaticWebAsset>
       <_EmbeddableStaticWebAsset>
         <_WebRequestPath Condition="'%(_EmbeddableStaticWebAsset.BasePath)' == '/'">%(_EmbeddableStaticWebAsset._PlainRelativePath)</_WebRequestPath>

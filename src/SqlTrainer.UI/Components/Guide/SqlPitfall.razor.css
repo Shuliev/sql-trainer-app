@@ -3,7 +3,6 @@
     border-radius: 4px;
     border: 1px solid var(--mud-palette-lines-default);
     border-left-width: 4px;
-    overflow-x: auto;
 }
 
 .pitfall-wrong {
@@ -37,4 +36,6 @@ pre {
     margin: 0;
     padding: 4px 12px 10px;
     font-size: 0.8125rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
