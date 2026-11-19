@@ -3,19 +3,19 @@ using SqlTrainer.Core.Abstractions;
 
 namespace SqlTrainer.Execution.Tests;
 
-public sealed class ExercisePracticeServiceTests : IDisposable
+public sealed class SqliteQueryExecutorTests : IDisposable
 {
     private readonly string _directory = Path.Combine(Path.GetTempPath(), $"sqltrainer-exec-tests-{Guid.NewGuid():N}");
-    private readonly ExercisePracticeService _service;
+    private readonly SqliteQueryExecutor _service;
 
-    public ExercisePracticeServiceTests()
+    public SqliteQueryExecutorTests()
     {
         Directory.CreateDirectory(_directory);
         CreateDatabase("Fuhrpark", """
             CREATE TABLE kunde (id INTEGER PRIMARY KEY, name TEXT, preis REAL, bild BLOB);
             INSERT INTO kunde VALUES (1, 'Anna', 1.5, NULL), (2, NULL, 2.0, x'0102');
             """);
-        _service = new ExercisePracticeService(new FolderLocator(_directory));
+        _service = new SqliteQueryExecutor(new FolderLocator(_directory));
     }
 
     public void Dispose() => Directory.Delete(_directory, recursive: true);
@@ -106,6 +106,76 @@ public sealed class ExercisePracticeServiceTests : IDisposable
         Assert.Equal(2L, count.ResultSet!.Rows[0][0]);
     }
 
+    [Theory]
+    [InlineData("SELECT 1; SELECT 2")]
+    [InlineData("SELECT 1; SELECT 2;")]
+    [InlineData("SELECT 1; DELETE FROM kunde")]
+    [InlineData("SELECT 1; SELEKT 2")]
+    public async Task SeveralStatementsAreRejected(string sql)
+    {
+        var result = await _service.ExecuteAsync("Fuhrpark", sql);
+
+        Assert.False(result.IsSuccess);
+        var count = await _service.ExecuteAsync("Fuhrpark", "SELECT COUNT(*) FROM kunde");
+        Assert.Equal(2L, count.ResultSet!.Rows[0][0]);
+    }
+
+    [Fact]
+    public async Task SeveralStatementsGiveTheOneStatementMessage()
+    {
+        var result = await _service.ExecuteAsync("Fuhrpark", "SELECT 1; SELECT 2");
+
+        Assert.Equal("Es ist nur eine SQL-Anweisung erlaubt.", result.ErrorMessage);
+    }
+
+    [Theory]
+    [InlineData("SELECT 1;")]
+    [InlineData("SELECT 1;  ")]
+    [InlineData("SELECT 1; -- Kommentar")]
+    [InlineData("SELECT 1 /* Kommentar */;\n")]
+    public async Task SingleStatementWithTrailingSemicolonOrCommentIsAccepted(string sql)
+    {
+        var result = await _service.ExecuteAsync("Fuhrpark", sql);
+
+        Assert.True(result.IsSuccess, result.ErrorMessage);
+        Assert.Equal(1L, result.ResultSet!.Rows[0][0]);
+    }
+
+    [Fact]
+    public async Task AttachCannotCreateAFileOutsideTheDatabase()
+    {
+        var target = Path.Combine(_directory, "neu.db").Replace('\\', '/');
+
+        await _service.ExecuteAsync("Fuhrpark", $"ATTACH DATABASE '{target}' AS neu");
+
+        Assert.False(File.Exists(Path.Combine(_directory, "neu.db")));
+    }
+
+    [Theory]
+    [InlineData("PRAGMA query_only = 0")]
+    [InlineData("PRAGMA journal_mode = WAL")]
+    [InlineData("PRAGMA user_version = 7")]
+    [InlineData("PRAGMA writable_schema = 1")]
+    public async Task PragmasCannotChangeTheDatabaseFile(string sql)
+    {
+        var file = Path.Combine(_directory, "Fuhrpark", "datenbank.db");
+        var before = await File.ReadAllBytesAsync(file);
+
+        await _service.ExecuteAsync("Fuhrpark", sql);
+
+        Assert.Equal(before, await File.ReadAllBytesAsync(file));
+        Assert.Equal(["datenbank.db"], Directory.EnumerateFileSystemEntries(Path.Combine(_directory, "Fuhrpark")).Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public async Task ReadingPragmaReturnsRows()
+    {
+        var result = await _service.ExecuteAsync("Fuhrpark", "PRAGMA table_info(kunde)");
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(4, result.ResultSet!.Rows.Count);
+    }
+
     [Fact]
     public async Task CancelledTokenReturnsFailureInsteadOfThrowing()
     {
@@ -130,7 +200,7 @@ public sealed class ExercisePracticeServiceTests : IDisposable
     [Fact]
     public void ConstructorRejectsNullLocator()
     {
-        Assert.Throws<ArgumentNullException>(() => new ExercisePracticeService(null!));
+        Assert.Throws<ArgumentNullException>(() => new SqliteQueryExecutor(null!));
     }
 
     private static string Numbers(int count) =>

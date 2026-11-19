@@ -4,14 +4,14 @@ using SqlTrainer.Core.Models;
 
 namespace SqlTrainer.Execution;
 
-public sealed class ExercisePracticeService : IQueryExecutor
+public sealed class SqliteQueryExecutor : IQueryExecutor
 {
     // Plan 3.4: at most this many rows are returned; further rows only set IsTruncated.
     private const int _maxRows = 1000;
 
     private readonly IExerciseDatabaseLocator _locator;
 
-    public ExercisePracticeService(IExerciseDatabaseLocator databaseLocator)
+    public SqliteQueryExecutor(IExerciseDatabaseLocator databaseLocator)
     {
         ArgumentNullException.ThrowIfNull(databaseLocator);
 
@@ -56,7 +56,7 @@ public sealed class ExercisePracticeService : IQueryExecutor
                 {
                     using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                     {
-                        return tempname(reader);
+                        return ReadResult(reader);
                     }
                 }
             }
@@ -74,8 +74,8 @@ public sealed class ExercisePracticeService : IQueryExecutor
 
     // Turns the reader's output into our ResultSet: columns by position (aliases and duplicate
     // names kept as the query returns them), raw values (long, double, string, byte[] or null,
-    // so NULL stays distinguishable from '' and numbers from text), at most MaxRows rows.
-    private static QueryResult tempname(SqliteDataReader reader)
+    // so NULL stays distinguishable from '' and numbers from text), at most _maxRows rows.
+    private static QueryResult ReadResult(SqliteDataReader reader)
     {
         var columns = new string[reader.FieldCount];
         for (var i = 0; i < columns.Length; i++)
@@ -97,6 +97,13 @@ public sealed class ExercisePracticeService : IQueryExecutor
 
         // The limit is reached: if one more row exists, the result was cut off.
         var isTruncated = rows.Count == _maxRows && reader.Read();
+
+        // Plan 3.4: exactly one statement per input. The reader only returns the first one's result, so
+        // without this check "SELECT 1; SELECT 2" would look like a success. A single trailing ';' is fine.
+        if (reader.NextResult())
+        {
+            return QueryResult.Failure("Es ist nur eine SQL-Anweisung erlaubt.");
+        }
 
         return QueryResult.Success(new ResultSet(columns, rows, isTruncated));
     }
