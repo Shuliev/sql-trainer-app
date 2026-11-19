@@ -1,0 +1,285 @@
+@page "/guide"
+
+<PageTitle>Anleitung - SQL-Trainer</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Anleitung</MudText>
+<MudText Class="mb-8">So erstellst du eine eigene Übungsdatenbank und lädst sie in den SQL-Trainer hoch.</MudText>
+
+<MudText Typo="Typo.h5" GutterBottom="true">Aufbau des Datenbankpakets</MudText>
+<br />
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Eine Übungsdatenbank wird als <b>eine ZIP-Datei</b> hochgeladen. Der Name der ZIP-Datei wird zum Namen der Datenbank,<br />
+    aus <code>Name_der_Datenbank.zip</code> wird also die Datenbank <code>Name_der_Datenbank</code>.<br />
+    Die ZIP-Datei muss genau diese vier Dateien enthalten:
+</MudText>
+
+<MudPaper Class="pa-4 my-4" Outlined="true">
+    <pre>@PackageStructure</pre>
+</MudPaper>
+
+<MudGrid Class="mb-8">
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="height: 100%">
+            <MudCardContent>
+                <MudText Typo="Typo.h6">beschreibung.txt</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Beschreibung des Szenarios und der Tabellen.</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="height: 100%">
+            <MudCardContent>
+                <MudText Typo="Typo.h6">er_diagramm.png</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">ER-Diagramm der Datenbank als PNG-Bild.</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="height: 100%">
+            <MudCardContent>
+                <MudText Typo="Typo.h6">datenbank.sql</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">SQL-Skript, das die Tabellen anlegt und die Beispieldaten einfügt.</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Style="height: 100%">
+            <MudCardContent>
+                <MudText Typo="Typo.h6">aufgaben.txt</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">25 Aufgaben mit Hilfestellung und Musterlösung.</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudAlert Severity="Severity.Normal" ContentAlignment="HorizontalAlignment.Start">
+    Die Dateien dürfen direkt im ZIP liegen oder in genau einem Unterordner (z.&nbsp;B. wenn du unter Windows
+    einen Ordner über „Senden an → ZIP-komprimierter Ordner“ packst). Groß- und Kleinschreibung der Dateinamen
+    spielt keine Rolle. Die ZIP-Datei darf höchstens @MaxMegabytes MB groß sein.
+</MudAlert>
+
+<br />
+<MudText Typo="Typo.h5" GutterBottom="true">Die Dateien im Detail</MudText>
+<br />
+<MudText Typo="Typo.body2">
+    Alle Textdateien müssen in <b>UTF-8</b> gespeichert sein, damit Umlaute wie ä, ö und ü richtig angezeigt werden.<br />
+    Ob die Zeilenenden im Windows- oder Linux-Format vorliegen, ist egal.
+</MudText>
+
+<br />
+<MudText Typo="Typo.h6" GutterBottom="true">beschreibung.txt</MudText>
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Ein kurzer Text, der den Lernenden erklärt, worum es in der Datenbank geht.<br />
+    Bewährt hat sich dieser Aufbau: Titel in der ersten Zeile, danach das Szenario,<br />
+    eine Liste der Tabellen und Hinweise zu Beziehungen und Datenformaten (z.&nbsp;B. wie ein Datum gespeichert ist).
+</MudText>
+<MudPaper Class="pa-4 my-4" Outlined="true">
+    <pre style="white-space: pre-wrap">@DescriptionExample</pre>
+</MudPaper>
+
+<br />
+<MudText Typo="Typo.h6" GutterBottom="true">er_diagramm.png</MudText>
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Das ER-Diagramm zeigt alle Tabellen mit ihren Spalten und Beziehungen. Es muss ein echtes <b>PNG-Bild</b> sein;<br />
+    eine umbenannte JPG- oder PDF-Datei funktioniert nicht. Achte auf eine gut lesbare Auflösung (ca. 800 Pixel Breite oder mehr).
+</MudText>
+
+<br />
+<MudText Typo="Typo.h6" GutterBottom="true">datenbank.sql</MudText>
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Das Skript wird mit <b>SQLite</b> ausgeführt und muss deshalb SQLite-kompatibel sein.<br />
+    Es legt zuerst alle Tabellen an und fügt danach die Beispieldaten ein.<br />
+    Am Anfang sollten die Tabellen mit <code>DROP TABLE IF EXISTS</code> gelöscht werden, damit das Skript mehrfach ausgeführt werden kann.<br />
+    Tabellen mit Fremdschlüsseln werden dabei zuerst gelöscht und zuletzt angelegt.
+</MudText>
+<MudPaper Class="pa-4 my-4" Outlined="true">
+    <pre>@SqlExample</pre>
+</MudPaper>
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Typische Unterschiede zu anderen Datenbanksystemen:
+</MudText>
+<MudList T="string" Dense="true">
+    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
+        Datumswerte als Text im Format <code>JJJJ-MM-TT</code> speichern (z.&nbsp;B. <code>'2025-11-19'</code>), Uhrzeiten als <code>HH:MM</code>.
+    </MudListItem>
+    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
+        Datentypen <code>INTEGER</code>, <code>REAL</code> und <code>TEXT</code> verwenden; <code>INTEGER PRIMARY KEY</code> statt <code>AUTO_INCREMENT</code>.
+    </MudListItem>
+    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
+        Keine Befehle wie <code>CREATE DATABASE</code> oder <code>USE</code>, die Datenbank legt der SQL-Trainer selbst an.
+    </MudListItem>
+    <MudListItem T="string" Icon="@Icons.Material.Filled.ChevronRight">
+        Mit <code>PRAGMA foreign_keys = ON;</code> werden Fremdschlüssel geprüft.
+    </MudListItem>
+</MudList>
+
+<br />
+<MudText Typo="Typo.h6" GutterBottom="true">aufgaben.txt</MudText>
+<MudText Typo="Typo.body2" GutterBottom="true">
+    Die Datei enthält <b>genau 25 Aufgaben</b>, davon <b>je 5</b> aus jedem der fünf Themenbereiche.<br />
+    Jede Aufgabe steht in einem eigenen Block. Ein Block beginnt und endet mit einer Zeile <code>##</code>,<br />
+    die fünf Felder stehen jeweils in einer eigenen Zeile und werden durch Zeilen mit <code>#</code> getrennt:
+</MudText>
+<MudPaper Class="pa-4 my-4" Outlined="true">
+    <pre>@TaskExample</pre>
+</MudPaper>
+
+<MudSimpleTable Dense="true" Outlined="true" Class="mb-4">
+    <thead>
+        <tr>
+            <th>Feld</th>
+            <th>Inhalt</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Nr</td><td>Fortlaufende Nummer von 1 bis 25, jede Nummer nur einmal.</td></tr>
+        <tr><td>Themenbereich</td><td>Einer der fünf Themen-Keys (siehe unten).</td></tr>
+        <tr><td>Aufgabe</td><td>Die Aufgabenstellung, die die Lernenden sehen.</td></tr>
+        <tr><td>Hilfestellung</td><td>Ein Tipp, der bei Bedarf angezeigt wird. Darf nicht leer sein.</td></tr>
+        <tr><td>Musterlösung</td><td>Eine <code>SELECT</code>-Abfrage, die gegen <code>datenbank.sql</code> fehlerfrei läuft.</td></tr>
+    </tbody>
+</MudSimpleTable>
+
+<MudText Typo="Typo.body2" GutterBottom="true">Diese Themen-Keys sind erlaubt:</MudText>
+<MudSimpleTable Dense="true" Outlined="true" Class="mb-4">
+    <thead>
+        <tr>
+            <th>Key in aufgaben.txt</th>
+            <th>Anzeige in der App</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td><code>SELECT</code></td><td>SELECT</td></tr>
+        <tr><td><code>AGGREGAT</code></td><td>Aggregatfunktionen</td></tr>
+        <tr><td><code>JOIN</code></td><td>JOIN</td></tr>
+        <tr><td><code>GRUPPIERUNG</code></td><td>GROUP BY</td></tr>
+        <tr><td><code>SUBSELECT</code></td><td>Subselects</td></tr>
+    </tbody>
+</MudSimpleTable>
+
+<MudAlert Severity="Severity.Warning" ContentAlignment="HorizontalAlignment.Start">
+    Die Zeilen <code>##</code> und <code>#</code> dienen als Trennzeichen. Schreibe Aufgabe, Hilfestellung und
+    Musterlösung deshalb jeweils in <b>eine Zeile</b> und verwende keine Zeile, die nur aus <code>#</code>-Zeichen besteht.
+</MudAlert>
+
+<br />
+<MudText Typo="Typo.h5" GutterBottom="true">Datenbank hochladen</MudText>
+<br />
+<MudText Typo="Typo.body2" GutterBottom="true">
+    1. Lege die vier Dateien in einen Ordner und benenne ihn so, wie die Datenbank heißen soll (z.&nbsp;B. <code>Schule</code>).<br />
+    2. Packe den Ordner oder die vier Dateien in eine ZIP-Datei (z.&nbsp;B. <code>Schule.zip</code>).<br />
+    3. Öffne die Seite
+    <MudLink Href="datenbanken-verwalten" Typo="Typo.body2" Color="Color.Primary"><b>Datenbanken verwalten</b></MudLink>
+    und klicke auf „Datenbank hochladen“.<br />
+    4. Wähle die ZIP-Datei aus. Gibt es schon eine Datenbank mit dem gleichen Namen, wirst du gefragt, ob sie ersetzt werden soll.
+</MudText>
+
+<br />
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudText Typo="Typo.h6" GutterBottom="true">Checkliste vor dem Hochladen</MudText>
+        <MudText Typo="Typo.body2">
+            ✔ Alle vier Dateien sind vorhanden und genau so benannt wie oben.<br />
+            ✔ Alle Textdateien sind in UTF-8 gespeichert.<br />
+            ✔ <code>datenbank.sql</code> läuft in SQLite ohne Fehler durch.<br />
+            ✔ <code>aufgaben.txt</code> enthält 25 Aufgaben, je 5 pro Themenbereich.<br />
+            ✔ Jede Musterlösung liefert gegen die Beispieldaten ein sinnvolles Ergebnis.<br />
+            ✔ Das ER-Diagramm passt zu den Tabellen in <code>datenbank.sql</code>.
+        </MudText>
+    </MudCardContent>
+</MudCard>
+
+<MudCard Class="mb-4">
+    <MudCardContent>
+        <MudText Typo="Typo.h6" GutterBottom="true">Tipp</MudText>
+        <MudText Typo="Typo.body2">
+            Teste deine Musterlösungen vorher mit einem SQLite-Werkzeug wie dem
+            <MudLink Href="https://sqlitebrowser.org" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
+                <b>DB Browser for SQLite</b>
+            </MudLink>.
+            So findest du Fehler, bevor du die Datenbank hochlädst.
+        </MudText>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private const int MaxMegabytes = 50;
+
+    private const string PackageStructure =
+        """
+        Name_der_Datenbank.zip
+        ├── beschreibung.txt   Beschreibung der Datenbank und des Szenarios
+        ├── er_diagramm.png    ER-Diagramm als PNG
+        ├── datenbank.sql      SQL-Skript: Tabellen erstellen + Beispieldaten einfügen
+        └── aufgaben.txt       25 Aufgaben inkl. Hilfestellungen und Musterlösungen
+        """;
+
+    private const string DescriptionExample =
+        """
+        Datenbank Schule
+
+        In dieser Datenbank werden die Daten von einem Berufskolleg verwaltet. Es gibt Klassen, Lehrer, Schüler, Fächer und Noten.
+
+        Tabellen:
+        - lehrer: die Lehrer mit Name und Kürzel
+        - klasse: die Klassen mit Bezeichnung, Raum und Klassenlehrer
+        - schueler: die Schüler mit Geburtsdatum und Klasse
+
+        Eine Klasse hat mehrere Schüler. Das Datum ist im Format JJJJ-MM-TT gespeichert.
+        """;
+
+    private const string SqlExample =
+        """
+        PRAGMA foreign_keys = ON;
+
+        DROP TABLE IF EXISTS schueler;
+        DROP TABLE IF EXISTS klasse;
+
+        CREATE TABLE klasse (
+          klasse_id INTEGER PRIMARY KEY,
+          bezeichnung TEXT NOT NULL UNIQUE,
+          raum TEXT NOT NULL
+        );
+
+        CREATE TABLE schueler (
+          schueler_id INTEGER PRIMARY KEY,
+          vorname TEXT NOT NULL,
+          nachname TEXT NOT NULL,
+          geburtsdatum TEXT NOT NULL,
+          klasse_id INTEGER NOT NULL,
+          FOREIGN KEY (klasse_id) REFERENCES klasse(klasse_id)
+        );
+
+        INSERT INTO klasse VALUES
+        (1, 'FI24A', 'A101'),
+        (2, 'FI24B', 'A102');
+
+        INSERT INTO schueler VALUES
+        (1, 'Leon', 'Arslan', '2008-04-19', 1),
+        (2, 'Marie', 'Becker', '2007-09-05', 2);
+        """;
+
+    private const string TaskExample =
+        """
+        ##
+        #
+        1
+        #
+        SELECT
+        #
+        Gib alle Schüler aus.
+        #
+        Verwende SELECT * FROM tabelle.
+        #
+        SELECT * FROM schueler;
+        #
+        ##
+        ##
+        #
+        2
+        #
+        SELECT
+        #
+        ...
+        """;
+}
