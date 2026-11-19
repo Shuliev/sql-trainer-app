@@ -91,5 +91,8 @@ public class DbManagementViewModelTests
             Names.Add(databaseName);
             return Task.CompletedTask;
         }
+
+        public Task<byte[]?> ReadFileAsync(string databaseName, string fileName, CancellationToken cancellationToken = default) =>
+            Task.FromResult<byte[]?>(null);
     }
 }

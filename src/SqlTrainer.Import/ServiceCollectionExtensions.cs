@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSqlTrainerImport(this IServiceCollection services)
     {
         services.AddSingleton<IDatabasePackageReader, ZipDatabasePackageReader>();
+        services.AddSingleton<IExerciseFileParser, ExerciseFileParser>();
         return services;
     }
 }

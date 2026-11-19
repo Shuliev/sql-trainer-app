@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.FileProviders;
 using SqlTrainer.App.Components;
 using SqlTrainer.Application;
+using SqlTrainer.Execution;
 using SqlTrainer.Import;
 using SqlTrainer.Storage;
 using SqlTrainer.UI;
@@ -28,6 +29,7 @@ var databaseDirectory = Path.Combine(
     FileSystemDatabasePackageStore.FolderName);
 builder.Services.AddSqlTrainerImport();
 builder.Services.AddSqlTrainerStorage(databaseDirectory);
+builder.Services.AddSqlTrainerExecution();
 builder.Services.AddSqlTrainerApplication();
 builder.Services.AddSqlTrainerUi();
 

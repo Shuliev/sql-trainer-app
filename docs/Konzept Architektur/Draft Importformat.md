@@ -14,16 +14,40 @@ Name_der_Datenbank.zip
 └── aufgaben.txt       25 Aufgaben inkl. Hilfestellungen und Musterlösungen
 ```
 
-`aufgaben.txt`: UTF-8, Feldtrenner `###TRENN###`, fünf Felder:
+`aufgaben.txt`: UTF-8, ein Datensatz steht zwischen zwei Zeilen `##`, die fünf Felder werden durch Zeilen `#` getrennt (auch vor dem ersten und nach dem letzten Feld):
 
 ```
-Nr###TRENN###Themenbereich###TRENN###Aufgabe###TRENN###Hilfestellung###TRENN###Musterloesung
+##
+#
+Nr
+#
+Themenbereich
+#
+Aufgabe
+#
+Hilfestellung
+#
+Musterloesung
+#
+##
 ```
 
 Beispiel:
 
 ```
-1###TRENN###SELECT###TRENN###Gib alle Kunden aus.###TRENN###Verwende SELECT *.###TRENN###SELECT * FROM kunde;
+##
+#
+1
+#
+SELECT
+#
+Gib alle Kunden aus.
+#
+Verwende SELECT *.
+#
+SELECT * FROM kunde;
+#
+##
 ```
 
 25 Aufgaben, je fünf aus: `SELECT`, `AGGREGAT`, `JOIN`, `GRUPPIERUNG`, `SUBSELECT`.
@@ -44,8 +68,8 @@ Das Importpaket enthält damit auch die Aufgaben (löst die Unklarheit im Kunden
 
 | # | Frage | Empfehlung |
 |---|---|---|
-| 1 | Datensatz pro Zeile? Mehrzeilige Musterlösungen/Texte? | Mehrzeilige Felder **erlaubt**. Ein neuer Datensatz beginnt an einer Zeile, die mit `<Ziffern>###TRENN###` anfängt. Zeilenumbruch am Feldende wird abgeschnitten. Dann sind Musterlösungen mit Umbrüchen (lesbare SQL) möglich |
-| 2 | Kopfzeile? | Keine Pflicht. Erste Zeile `Nr###TRENN###Themenbereich…` wird, falls vorhanden, ignoriert |
+| 1 | Datensatz pro Zeile? Mehrzeilige Musterlösungen/Texte? | Mehrzeilige Felder **erlaubt**. Ein Feld umfasst alle Zeilen zwischen zwei `#`-Zeilen und wird mit `\n` zusammengefügt; Leerraum am Feldanfang/-ende wird abgeschnitten. Dann sind Musterlösungen mit Umbrüchen (lesbare SQL) möglich |
+| 2 | Kopfzeile? | Nein. Text außerhalb der `##`-Blöcke wird ignoriert |
 | 3 | ZIP-Struktur, Dateinamen | Dateien im Root **oder** in genau einem Unterordner (Windows „Komprimierter Ordner“). Dateinamen unabhängig von Groß-/Kleinschreibung: Das braucht echten Code (Vergleich mit `OrdinalIgnoreCase` auf den ZIP-Einträgen), weil unter Linux Dateinamen case-sensitiv sind; es darf nicht am Dateisystem hängen. Gibt es zwei Einträge, die sich nur in der Schreibweise unterscheiden: Ablehnung. Pfadtrenner in Eintragsnamen normalisieren: ZIPs aus Windows-Werkzeugen enthalten teils `\` statt `/`. Zusatzdateien werden ignoriert (Warnung). Fehlt eine der vier Pflichtdateien: Ablehnung. Pfade mit `..` oder absolute Pfade (nach der Normalisierung geprüft): Ablehnung (Zip-Slip). Größenlimit z. B. 50 MB entpackt. Gelesen wird direkt aus dem ZIP-Stream; das Entpacken auf die Platte entfällt, damit Dateinamen aus dem ZIP nie zu Pfaden werden |
 | 4 | Encoding von `beschreibung.txt`, `datenbank.sql` | Alle Textdateien UTF-8 (BOM toleriert). Anderes Encoding: Ablehnung mit klarer Meldung, kein Raten. Zeilenenden CRLF und LF werden in allen Textdateien akzeptiert (auch gemischt); intern wird auf LF normalisiert, bevor Datensätze erkannt werden |
 | 5 | DB-Name, Kollision | Name = ZIP-Dateiname ohne `.zip`; `_` wird in der Anzeige zu Leerzeichen. Existiert der Name bereits: Ablehnung mit Hinweis, erst löschen. Aufgaben lassen sich in der App bearbeiten, daher ist „Ersetzen“ in v1 nicht nötig |
@@ -74,7 +98,7 @@ Erst wenn alles besteht, wird das Paket dauerhaft gespeichert (atomar: temporär
 
 - Beispielpaket als Download mitliefern
 - Typische Fehler mit Meldungstext und Behebung auflisten
-- Hinweis: `###TRENN###` darf in keinem Feldtext vorkommen
+- Hinweis: Eine Zeile, die nur aus `#` oder `##` besteht, darf in keinem Feldtext vorkommen
 - Hinweis zum SQL-Dialekt (SQLite) mit Beispielen für übliche Abweichungen
 - Datensicherung: Datenordner kopieren (Pfad je Betriebssystem angeben)
 - Hinweis zum Packen: Zeilenenden CRLF/LF sind egal; ZIP mit gängigen Werkzeugen erzeugen, Dateinamen genau wie oben schreiben

@@ -14,4 +14,7 @@ public interface IDatabasePackageStore
 
     /// <summary>Saves the package under <paramref name="databaseName"/>, replacing an existing one with the same name.</summary>
     Task SaveAsync(string databaseName, DatabasePackage package, CancellationToken cancellationToken = default);
+
+    /// <summary>Reads one file of a stored package; <c>null</c> if the database or the file doesn't exist.</summary>
+    Task<byte[]?> ReadFileAsync(string databaseName, string fileName, CancellationToken cancellationToken = default);
 }

@@ -57,5 +57,8 @@ public class DatabaseManagementServiceTests
             Saved[databaseName] = package;
             return Task.CompletedTask;
         }
+
+        public Task<byte[]?> ReadFileAsync(string databaseName, string fileName, CancellationToken cancellationToken = default) =>
+            Task.FromResult<byte[]?>(null);
     }
 }

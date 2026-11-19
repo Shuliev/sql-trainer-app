@@ -75,6 +75,28 @@ public sealed class FileSystemDatabasePackageStoreTests : IDisposable
         Assert.Empty(_store.ListNames());
     }
 
+    [Fact]
+    public async Task ReadFileAsyncReturnsStoredContent()
+    {
+        await _store.SaveAsync("Kino (1)", Package(("datenbank.sql", "v1")));
+
+        var content = await _store.ReadFileAsync("Kino (1)", "datenbank.sql");
+
+        Assert.Equal("v1", System.Text.Encoding.UTF8.GetString(content!));
+    }
+
+    [Theory]
+    [InlineData("Fuhrpark", "fehlt.txt")]
+    [InlineData("Unbekannt", "datenbank.sql")]
+    [InlineData("..", "datenbank.sql")]
+    [InlineData("Fuhrpark", "../datenbank.sql")]
+    public async Task ReadFileAsyncMissingOrInvalidReturnsNull(string databaseName, string fileName)
+    {
+        await _store.SaveAsync("Fuhrpark", Package(("datenbank.sql", "v1")));
+
+        Assert.Null(await _store.ReadFileAsync(databaseName, fileName));
+    }
+
     private static DatabasePackage Package(params (string Name, string Content)[] files) =>
         new(files.ToDictionary(file => file.Name, file => System.Text.Encoding.UTF8.GetBytes(file.Content)));
 }

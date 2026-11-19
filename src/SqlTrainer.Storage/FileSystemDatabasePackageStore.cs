@@ -71,6 +71,17 @@ public sealed partial class FileSystemDatabasePackageStore : IDatabasePackageSto
         }
     }
 
+    public async Task<byte[]?> ReadFileAsync(string databaseName, string fileName, CancellationToken cancellationToken = default)
+    {
+        if (!IsValidName(databaseName) || !IsValidName(fileName))
+        {
+            return null;
+        }
+
+        var path = Path.Combine(Location, databaseName, fileName);
+        return File.Exists(path) ? await File.ReadAllBytesAsync(path, cancellationToken) : null;
+    }
+
     /// <summary>A single, non-hidden path segment (no separators, no "." / "..").</summary>
     private static bool IsValidName(string name) =>
         !string.IsNullOrWhiteSpace(name)
