@@ -9,8 +9,10 @@ public static class ServiceCollectionExtensions
     /// <summary>Registers the file-based store; <paramref name="databaseDirectory"/> is the preferred folder (falls back to local app data if not writable).</summary>
     public static IServiceCollection AddSqlTrainerStorage(this IServiceCollection services, string databaseDirectory)
     {
-        services.AddSingleton<IDatabasePackageStore>(provider => new FileSystemDatabasePackageStore(
+        services.AddSingleton(provider => new FileSystemDatabasePackageStore(
             databaseDirectory, provider.GetRequiredService<ILogger<FileSystemDatabasePackageStore>>()));
+        services.AddSingleton<IDatabasePackageStore>(provider => provider.GetRequiredService<FileSystemDatabasePackageStore>());
+        services.AddSingleton<IExerciseDatabaseLocator>(provider => provider.GetRequiredService<FileSystemDatabasePackageStore>());
         return services;
     }
 }

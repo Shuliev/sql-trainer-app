@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using SqlTrainer.Core;
 using SqlTrainer.Core.Abstractions;
@@ -10,9 +11,14 @@ namespace SqlTrainer.Storage;
 /// own copy of the app, so "the server" is the user's own device. If the preferred directory isn't
 /// writable (e.g. the exe lies in C:\Program Files), the user's local application data folder is used.
 /// </summary>
-public sealed partial class FileSystemDatabasePackageStore : IDatabasePackageStore
+public sealed partial class FileSystemDatabasePackageStore : IDatabasePackageStore, IExerciseDatabaseLocator
 {
     public const string FolderName = "Datenbanken";
+
+    /// <summary>SQLite file that is created from <see cref="_scriptFileName"/> when a package is saved.</summary>
+    public const string DatabaseFileName = "datenbank.db";
+
+    private const string _scriptFileName = "datenbank.sql";
 
     private readonly ILogger<FileSystemDatabasePackageStore> _logger;
 
@@ -57,6 +63,8 @@ public sealed partial class FileSystemDatabasePackageStore : IDatabasePackageSto
                 await File.WriteAllBytesAsync(Path.Combine(tempDir, fileName), content, cancellationToken);
             }
 
+            await CreateDatabaseAsync(tempDir, cancellationToken);
+
             var targetDir = Path.Combine(Location, databaseName);
             if (Directory.Exists(targetDir))
             {
@@ -68,6 +76,56 @@ public sealed partial class FileSystemDatabasePackageStore : IDatabasePackageSto
         finally
         {
             TryDeleteDirectory(tempDir);
+        }
+    }
+
+    public string GetFilePath(string databaseName)
+    {
+        if (!IsValidName(databaseName))
+        {
+            throw new ArgumentException("Ungültiger Datenbankname.", nameof(databaseName));
+        }
+
+        return Path.Combine(Location, databaseName, DatabaseFileName);
+    }
+
+    /// <summary>
+    /// Runs <c>datenbank.sql</c> in one transaction against a new <see cref="DatabaseFileName"/> in <paramref name="directory"/>.
+    /// Pooling is off so the file is released as soon as the connection is disposed; otherwise it stays locked on
+    /// Windows and the folder can't be moved.
+    /// </summary>
+    private static async Task CreateDatabaseAsync(string directory, CancellationToken cancellationToken)
+    {
+        var scriptPath = Path.Combine(directory, _scriptFileName);
+        if (!File.Exists(scriptPath))
+        {
+            throw new InvalidDatabasePackageException($"Die Datei {_scriptFileName} fehlt.");
+        }
+
+        var script = await File.ReadAllTextAsync(scriptPath, cancellationToken);
+        var connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = Path.Combine(directory, DatabaseFileName),
+            Mode = SqliteOpenMode.ReadWriteCreate,
+            Pooling = false,
+        }.ToString();
+
+        try
+        {
+            await using var connection = new SqliteConnection(connectionString);
+            await connection.OpenAsync(cancellationToken);
+            await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync(cancellationToken);
+            await using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+#pragma warning disable CA2100 // The script is the customer's package content; it runs against a new, empty database file.
+            command.CommandText = script;
+#pragma warning restore CA2100
+            await command.ExecuteNonQueryAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (SqliteException ex)
+        {
+            throw new InvalidDatabasePackageException($"{_scriptFileName} konnte nicht ausgeführt werden: {ex.Message}", ex);
         }
     }
 
