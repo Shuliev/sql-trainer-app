@@ -13,22 +13,26 @@ namespace SqlTrainer.Storage;
 /// </summary>
 public sealed partial class FileSystemDatabasePackageStore : IDatabasePackageStore, IExerciseDatabaseLocator
 {
+    /// <summary>
+    /// The Folder name.
+    /// </summary>
     public const string FolderName = "Datenbanken";
 
-    /// <summary>SQLite file that is created from <see cref="_scriptFileName"/> when a package is saved.</summary>
+    /// <summary>
+    /// SQLite file that is created from <see cref="_scriptFileName"/> when a package is saved.
+    /// </summary>
     public const string DatabaseFileName = "datenbank.db";
 
     private const string _scriptFileName = "datenbank.sql";
-
     private readonly ILogger<FileSystemDatabasePackageStore> _logger;
+
+    public string Location { get; }
 
     public FileSystemDatabasePackageStore(string preferredDirectory, ILogger<FileSystemDatabasePackageStore> logger)
     {
         _logger = logger;
         Location = ResolveWritableDirectory(preferredDirectory);
     }
-
-    public string Location { get; }
 
     public IReadOnlyList<string> ListNames() =>
         Directory.EnumerateDirectories(Location)

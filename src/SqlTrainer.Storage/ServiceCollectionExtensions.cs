@@ -11,8 +11,11 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(provider => new FileSystemDatabasePackageStore(
             databaseDirectory, provider.GetRequiredService<ILogger<FileSystemDatabasePackageStore>>()));
+
         services.AddSingleton<IDatabasePackageStore>(provider => provider.GetRequiredService<FileSystemDatabasePackageStore>());
+
         services.AddSingleton<IExerciseDatabaseLocator>(provider => provider.GetRequiredService<FileSystemDatabasePackageStore>());
+
         return services;
     }
 }
