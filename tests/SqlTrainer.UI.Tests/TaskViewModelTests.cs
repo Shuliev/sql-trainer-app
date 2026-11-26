@@ -43,6 +43,16 @@ public class TaskViewModelTests
 
         Assert.Equal(3, _viewModel.Position);
         Assert.Null(_viewModel.NextExerciseUrl);
+        Assert.Equal("tasks/Kino%20%281%29/select/3", _viewModel.PreviousExerciseUrl);
+    }
+
+    [Fact]
+    public async Task LoadAsync_FirstExerciseOfTopicHasNoPrevious()
+    {
+        await _viewModel.LoadAsync("Kino (1)", "select", 1);
+
+        Assert.Null(_viewModel.PreviousExerciseUrl);
+        Assert.Equal("tasks/Kino%20%281%29/", _viewModel.TaskListUrl);
     }
 
     [Fact]
@@ -81,6 +91,31 @@ public class TaskViewModelTests
         Assert.False(_viewModel.ShowHint);
         Assert.False(_viewModel.ShowSolution);
         Assert.Null(_viewModel.ResultMessage);
+    }
+
+    [Fact]
+    public async Task OpenErDiagramAsync_LoadsDiagramAsDataUrl()
+    {
+        await _viewModel.LoadAsync("Kino (1)", "select", 1);
+
+        await _viewModel.OpenErDiagramAsync();
+
+        Assert.True(_viewModel.ShowErDiagram);
+        Assert.Equal("data:image/png;base64," + Convert.ToBase64String(Encoding.UTF8.GetBytes("x")), _viewModel.ErDiagramUrl);
+        Assert.Null(_viewModel.ErDiagramError);
+
+        _viewModel.CloseErDiagram();
+
+        Assert.False(_viewModel.ShowErDiagram);
+    }
+
+    [Fact]
+    public async Task OpenErDiagramAsync_WithoutExerciseDoesNothing()
+    {
+        await _viewModel.OpenErDiagramAsync();
+
+        Assert.False(_viewModel.ShowErDiagram);
+        Assert.Null(_viewModel.ErDiagramUrl);
     }
 
     [Fact]

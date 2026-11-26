@@ -48,6 +48,16 @@ public class ExerciseServiceTests
         Assert.Null(await _service.GetExerciseAsync(databaseName, topic, number));
 
     [Fact]
+    public async Task GetErDiagramAsyncReturnsStoredPng()
+    {
+        byte[] png = [0x89, 0x50, 0x4E, 0x47];
+        _store.Files["Kino (1)/er_diagramm.png"] = png;
+
+        Assert.Equal(png, await _service.GetErDiagramAsync("Kino (1)"));
+        Assert.Null(await _service.GetErDiagramAsync("Unbekannt"));
+    }
+
+    [Fact]
     public async Task GetExerciseAsyncMissingFileThrows()
     {
         _store.Files.Remove("Kino (1)/datenbank.sql");

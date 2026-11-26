@@ -10,6 +10,7 @@ public sealed class ExerciseService(IDatabasePackageStore store, IExerciseFilePa
 {
     public const string ExerciseFileName = "aufgaben.txt";
     public const string SetupScriptFileName = "datenbank.sql";
+    public const string ErDiagramFileName = "er_diagramm.png";
 
     /// <summary>Number of sample rows shown per table.</summary>
     public const int SampleRowLimit = 5;
@@ -40,6 +41,10 @@ public sealed class ExerciseService(IDatabasePackageStore store, IExerciseFilePa
         var tables = await inspector.InspectAsync(setupScript, SampleRowLimit, cancellationToken);
         return new ExerciseDetails(databaseName, exercise, topicExercises, tables);
     }
+
+    /// <summary>PNG bytes of the ER diagram of <paramref name="databaseName"/>; <c>null</c> if the database or the file doesn't exist.</summary>
+    public Task<byte[]?> GetErDiagramAsync(string databaseName, CancellationToken cancellationToken = default) =>
+        store.ReadFileAsync(databaseName, ErDiagramFileName, cancellationToken);
 
     private async Task<string> ReadTextAsync(string databaseName, string fileName, CancellationToken cancellationToken)
     {

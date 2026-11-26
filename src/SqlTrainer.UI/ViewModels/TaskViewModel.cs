@@ -27,12 +27,39 @@ public sealed class TaskViewModel(ExerciseService exercises) : ViewModelBase
 
     public string? ResultMessage { get; private set; }
 
+    public bool ShowErDiagram { get; private set; }
+
+    /// <summary>ER diagram as <c>data:</c> URL; <c>null</c> until it was opened once for the current database.</summary>
+    public string? ErDiagramUrl { get; private set; }
+
+    /// <summary>Message shown in the diagram dialog when the diagram couldn't be loaded.</summary>
+    public string? ErDiagramError { get; private set; }
+
     public string TopicDisplayName => Details is null ? string.Empty : TopicNames.GetDisplayName(Details.Exercise.Topic);
 
     /// <summary>1-based position of the exercise within its topic.</summary>
     public int Position => Details is null ? 0 : IndexInTopic(Details) + 1;
 
     public int TopicExerciseCount => Details?.TopicExercises.Count ?? 0;
+
+    /// <summary>URL of the task list of the current database, e.g. <c>tasks/Kino%20(1)/</c>.</summary>
+    public string? TaskListUrl => Details is null ? null : GetTaskListUrl(Details.DatabaseName);
+
+    /// <summary>URL of the previous exercise of the same topic; <c>null</c> on the first one.</summary>
+    public string? PreviousExerciseUrl
+    {
+        get
+        {
+            if (Details is null)
+            {
+                return null;
+            }
+            var previous = IndexInTopic(Details) - 1;
+            return previous >= 0
+                ? GetExerciseUrl(Details.DatabaseName, Details.TopicExercises[previous])
+                : null;
+        }
+    }
 
     /// <summary>URL of the next exercise of the same topic; <c>null</c> on the last one.</summary>
     public string? NextExerciseUrl
@@ -83,6 +110,12 @@ public sealed class TaskViewModel(ExerciseService exercises) : ViewModelBase
             return;
         }
 
+        if (details?.DatabaseName != Details?.DatabaseName)
+        {
+            ErDiagramUrl = null;
+            ErDiagramError = null;
+        }
+        ShowErDiagram = false;
         Details = details;
         ErrorMessage = error;
         IsNotFound = details is null && error is null;
@@ -109,6 +142,57 @@ public sealed class TaskViewModel(ExerciseService exercises) : ViewModelBase
         NotifyStateChanged();
     }
 
+    /// <summary>Opens the ER diagram dialog and loads the diagram on first use.</summary>
+    public async Task OpenErDiagramAsync(CancellationToken cancellationToken = default)
+    {
+        if (Details is null)
+        {
+            return;
+        }
+
+        ShowErDiagram = true;
+        NotifyStateChanged();
+        if (ErDiagramUrl is not null)
+        {
+            return;
+        }
+
+        var databaseName = Details.DatabaseName;
+        string? url = null;
+        string? error = null;
+        try
+        {
+            var bytes = await exercises.GetErDiagramAsync(databaseName, cancellationToken);
+            if (bytes is null)
+            {
+                error = $"Die Datei \"{ExerciseService.ErDiagramFileName}\" fehlt.";
+            }
+            else
+            {
+                url = "data:image/png;base64," + Convert.ToBase64String(bytes);
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            error = $"Das ER-Diagramm konnte nicht gelesen werden: {ex.Message}";
+        }
+
+        if (Details?.DatabaseName != databaseName)
+        {
+            return;
+        }
+
+        ErDiagramUrl = url;
+        ErDiagramError = error;
+        NotifyStateChanged();
+    }
+
+    public void CloseErDiagram()
+    {
+        ShowErDiagram = false;
+        NotifyStateChanged();
+    }
+
     public void CheckQuery()
     {
         // Running and comparing the query is not connected yet.
@@ -124,6 +208,9 @@ public sealed class TaskViewModel(ExerciseService exercises) : ViewModelBase
         ArgumentNullException.ThrowIfNull(exercise);
         return $"tasks/{Uri.EscapeDataString(databaseName)}/{TopicNames.GetKey(exercise.Topic).ToLowerInvariant()}/{exercise.Number}";
     }
+
+    /// <summary>Relative URL of the task list of a database, e.g. <c>tasks/Kino%20(1)/</c>.</summary>
+    public static string GetTaskListUrl(string databaseName) => $"tasks/{Uri.EscapeDataString(databaseName)}/";
 
     /// <summary>Formats a raw SQLite value for display; numbers use "." like in SQL.</summary>
     public static string FormatValue(object? value) => value switch
